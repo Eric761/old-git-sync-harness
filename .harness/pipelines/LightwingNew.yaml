@@ -1,0 +1,376 @@
+pipeline:
+    name: Lightwing
+    identifier: LightwingNew
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: LightwingAPI
+              identifier: LightwingAPI
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              artifacts:
+                                  sidecars: []
+                                  primary:
+                                      type: Gcr
+                                      spec:
+                                          connectorRef: Platform_Viewer
+                                          imagePath: platform-205701/harness/lightwing/lightwing
+                                          registryHostname: us.gcr.io
+                                          tag: <+input>
+                              variables: []
+                              manifestOverrideSets: []
+                              manifests:
+                                  - manifest:
+                                        identifier: lw_api_manifests
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Git
+                                                spec:
+                                                    connectorRef: Prod_NG_Manifest_Repo
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test_k8s/lightwing/lightwingAPI/manifestFiles
+                                                    branch: master
+                                            skipResourceVersioning: false
+                                  - manifest:
+                                        identifier: all_lw_values
+                                        type: Values
+                                        spec:
+                                            store:
+                                                type: Git
+                                                spec:
+                                                    connectorRef: Prod_NG_Manifest_Repo
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test_k8s/lightwing/lightwingAPI/environment/<+pipeline.variables.ENV>/
+                                                        - test_k8s/lightwing/lightwingAPI/environment/<+pipeline.variables.ENV>/<+pipeline.variables.availabilityType>/
+                                                    branch: master
+                      serviceRef: dd
+                  infrastructure:
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: <+pipeline.variables.Connector>
+                              namespace: <+pipeline.variables.namespace>
+                              releaseName: <+pipeline.variables.ReleaseName>
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: dummy
+                      environmentRef: <+pipeline.variables.ENV>
+                  execution:
+                      steps:
+                          - step:
+                                type: K8sApply
+                                name: MigrateDatabase
+                                identifier: MigrateDatabase
+                                spec:
+                                    skipDryRun: false
+                                    skipSteadyStateCheck: false
+                                    filePaths:
+                                        - templates/migratedb.yaml
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                timeout: 10m
+                                when:
+                                    stageStatus: Success
+                                    condition: <+infra.connectorRef> !~ ".*failover.*"
+                          - step:
+                                type: K8sDelete
+                                name: DeleteMigrate
+                                identifier: DeleteMigrate
+                                spec:
+                                    deleteResources:
+                                        type: ManifestPath
+                                        spec:
+                                            manifestPaths:
+                                                - <+infra.namespace>/Job/lwd-migrate
+                                            delegateSelectors:
+                                                - stage-delegate-prod
+                                timeout: 10m
+                                when:
+                                    stageStatus: Success
+                                    condition: <+infra.connectorRef> !~ ".*failover.*"
+                          - step:
+                                name: Rollout Deployment
+                                identifier: rolloutDeployment
+                                type: K8sRollingDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              when:
+                  pipelineStatus: Success
+                  condition: <+pipeline.variables.Service2Deploy>=="LW_API" or <+pipeline.variables.Service2Deploy>=="ALL" or <+pipeline.variables.Service2Deploy>=="LW_API_WORKER"
+        - stage:
+              name: LightwingFaktory
+              identifier: LightwingFaktory
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              artifacts:
+                                  sidecars: []
+                                  primary:
+                                      type: Gcr
+                                      spec:
+                                          connectorRef: Platform_Viewer
+                                          imagePath: platform-205701/harness/lightwing/lightwing
+                                          registryHostname: us.gcr.io
+                                          tag: <+input>
+                              manifestOverrideSets: []
+                              manifests:
+                                  - manifest:
+                                        identifier: lw_faktory_manifest
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Git
+                                                spec:
+                                                    connectorRef: Prod_NG_Manifest_Repo
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test_k8s/lightwing/lightwingFaktory/manifestFiles
+                                                    branch: master
+                                            skipResourceVersioning: false
+                                  - manifest:
+                                        identifier: all_faktory_values
+                                        type: Values
+                                        spec:
+                                            store:
+                                                type: Git
+                                                spec:
+                                                    connectorRef: Prod_NG_Manifest_Repo
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test_k8s/lightwing/lightwingFaktory/environment/<+pipeline.variables.ENV>/
+                                                        - test_k8s/lightwing/lightwingFaktory/environment/<+pipeline.variables.ENV>/<+pipeline.variables.availabilityType>/
+                                                    branch: master
+                              variables: []
+                      serviceRef: dd
+                  infrastructure:
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: <+pipeline.variables.Connector>
+                              namespace: <+pipeline.variables.namespace>
+                              releaseName: <+pipeline.variables.ReleaseName>
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: <+pipeline.variables.Infrastructure_Key>
+                      environmentRef: <+pipeline.variables.ENV>
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: MapInfraInstanceCount
+                                identifier: MapInfraInstanceCount
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: |-
+                                                echo <+infra.connectorRef>
+                                                case <+infra.connectorRef> in
+                                                  *failover*)
+                                                    count=0
+                                                    ;;
+                                                  *)
+                                                    count=<+serviceVariables.instances>
+                                                    ;;
+                                                esac
+                                                echo $count
+                                    environmentVariables: []
+                                    outputVariables:
+                                        - name: count
+                                          type: String
+                                          value: count
+                                    executionTarget: {}
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                timeout: 10m
+                          - step:
+                                name: Rollout Deployment
+                                identifier: rolloutDeployment
+                                type: K8sRollingDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              when:
+                  pipelineStatus: Success
+                  condition: <+pipeline.variables.Service2Deploy>=="LW_FAKTORY" or <+pipeline.variables.Service2Deploy>=="ALL"
+        - stage:
+              name: LightwingFaktoryWorker
+              identifier: LightwingFaktoryWorker
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              artifacts:
+                                  sidecars: []
+                                  primary:
+                                      type: Gcr
+                                      spec:
+                                          connectorRef: Platform_Viewer
+                                          imagePath: platform-205701/harness/lightwing/lightwing
+                                          registryHostname: us.gcr.io
+                                          tag: <+input>
+                              manifestOverrideSets: []
+                              manifests:
+                                  - manifest:
+                                        identifier: lw_worker_manifests
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Git
+                                                spec:
+                                                    connectorRef: Prod_NG_Manifest_Repo
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test_k8s/lightwing/lightwingFaktoryWorker/manifestFiles
+                                                    branch: master
+                                            skipResourceVersioning: false
+                                  - manifest:
+                                        identifier: all_worker_values
+                                        type: Values
+                                        spec:
+                                            store:
+                                                type: Git
+                                                spec:
+                                                    connectorRef: Prod_NG_Manifest_Repo
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test_k8s/lightwing/lightwingFaktoryWorker/environment/<+pipeline.variables.ENV>/
+                                                        - test_k8s/lightwing/lightwingFaktoryWorker/environment/<+pipeline.variables.ENV>/<+pipeline.variables.availabilityType>/
+                                                    branch: master
+                              variables: []
+                      serviceRef: dd
+                  infrastructure:
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: <+pipeline.variables.Connector>
+                              namespace: <+pipeline.variables.namespace>
+                              releaseName: <+pipeline.variables.ReleaseName>
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: <+pipeline.variables.Infrastructure_Key>
+                      environmentRef: <+pipeline.variables.ENV>
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: MapInfraInstanceCount
+                                identifier: MapInfraInstanceCount
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: |-
+                                                echo <+infra.connectorRef>
+                                                case <+infra.connectorRef> in
+                                                  *failover*)
+                                                    count=0
+                                                    ;;
+                                                  *)
+                                                    count=<+serviceVariables.instances>
+                                                    ;;
+                                                esac
+                                                echo $count
+                                    environmentVariables: []
+                                    outputVariables:
+                                        - name: count
+                                          type: String
+                                          value: count
+                                    executionTarget: {}
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                timeout: 10m
+                          - step:
+                                name: Rollout Deployment
+                                identifier: rolloutDeployment
+                                type: K8sRollingDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              when:
+                  pipelineStatus: Success
+                  condition: <+pipeline.variables.Service2Deploy>=="LW_WORKER" or <+pipeline.variables.Service2Deploy>=="ALL" or <+pipeline.variables.Service2Deploy>=="LW_API_WORKER"
+    variables:
+        - name: ENV
+          type: String
+          value: <+input>.allowedValues(uat,prod,free)
+        - name: availabilityType
+          type: String
+          value: <+input>.allowedValues(primary,failover)
+        - name: Service2Deploy
+          type: String
+          default: LW_API_WORKER
+          value: <+input>.allowedValues(LW_API,LW_WORKER,LW_FAKTORY,LW_API_WORKER,ALL)
+        - name: Connector
+          type: String
+          value: <+input>.allowedValues(uatprivate,uatfailoverprivate)
+        - name: ReleaseName
+          type: String
+          value: <+input>
+        - name: namespace
+          type: String
+          value: <+input>.allowedValues(lightwing,lightwing-free)
+        - name: secret1
+          type: Secret
+          value: KapilToken
