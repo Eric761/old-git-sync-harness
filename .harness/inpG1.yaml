@@ -17,3 +17,5 @@ inputSet:
                 type: "Http"
                 spec:
                   requestBody: "egrf"
+                  method: "GET"
+                timeout: "2m"
