@@ -1,0 +1,22 @@
+template:
+    name: Echo Template
+    identifier: Echo_Template
+    versionLabel: V1
+    type: Step
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    description: null
+    tags: {}
+    spec:
+        type: ShellScript
+        timeout: 11m
+        spec:
+            shell: Bash
+            onDelegate: true
+            source:
+                type: Inline
+                spec:
+                    script: <+input>
+            environmentVariables: []
+            outputVariables: []
+            executionTarget: {}
