@@ -1,0 +1,86 @@
+pipeline:
+    name: Test Project
+    identifier: Test_Project
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: QA Stage
+              identifier: QA_Stage
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              manifestOverrideSets: []
+                              manifests:
+                                  - manifest:
+                                        identifier: asd
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: Github_CCD
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test
+                                                    branch: <+input>
+                                            skipResourceVersioning: <+input>
+                                        type: K8sManifest
+                              artifacts:
+                                  sidecars: []
+                              variables:
+                                  - name: asd
+                                    type: String
+                                    default: abc
+                                    value: <+input>.allowedValues(abc,xys)
+                                  - name: dfg
+                                    type: Secret
+                                    value: <+input>
+                                  - name: fgh
+                                    type: Number
+                                    value: <+input>
+                      serviceRef: <+input>
+                  infrastructure:
+                      environmentRef: qa
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: account.k8sqatarget
+                              namespace: ad
+                              releaseName: asd
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: ""
+                  execution:
+                      steps:
+                          - step:
+                                type: K8sRollingDeploy
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    skipDryRun: <+input>
+                                timeout: <+input>
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              when:
+                  pipelineStatus: Success
+                  condition: <+serviceConfig.serviceDefinition.spec.variables.asd> === 'xyz'
+    variables:
+        - name: asd
+          type: String
+          value: <+input>
+        - name: hgj
+          type: Secret
+          value: <+input>
+        - name: ghj
+          type: Number
+          value: 0
