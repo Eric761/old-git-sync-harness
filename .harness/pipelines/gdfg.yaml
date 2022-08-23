@@ -1,0 +1,38 @@
+pipeline:
+    name: gdfg
+    identifier: gdfg
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    properties:
+        ci:
+            codebase:
+                connectorRef: Kapil_Test
+                build: <+input>
+    stages:
+        - stage:
+              name: sdfsdf
+              identifier: sdfsdf
+              type: CI
+              spec:
+                  cloneCodebase: true
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                  infrastructure:
+                      type: KubernetesDirect
+                      spec:
+                          connectorRef: asdff
+                          namespace: <+input>
+                  execution:
+                      steps:
+                          - step:
+                                type: Run
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    connectorRef: harnessImage
+                                    image: asd
+                                    command: asd
+                                    privileged: false
+              variables: []
