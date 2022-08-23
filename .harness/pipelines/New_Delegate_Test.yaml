@@ -1,0 +1,149 @@
+pipeline:
+    name: New Delegate Test
+    identifier: New_Delegate_Test
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags:
+        test: ""
+        test1: ""
+    stages:
+        - stage:
+              name: Demo Stage 1
+              identifier: Demo_Stage_1
+              description: |
+                  asdffdsf
+                  sdfa
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                              manifests:
+                                  - manifest:
+                                        identifier: test
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Git
+                                                spec:
+                                                    connectorRef: sdfgdfg
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - asd
+                                                    repoName: asd
+                                                    branch: asd
+                                            skipResourceVersioning: false
+                              artifacts:
+                                  primary:
+                                      type: DockerRegistry
+                                      spec:
+                                          connectorRef: harnessImage
+                                          imagePath: asd
+                                          tag: <+input>
+                      service:
+                          identifier: test1
+                          name: test
+                          tags:
+                              test: ""
+                  infrastructure:
+                      environment:
+                          name: test
+                          identifier: teee
+                          type: PreProduction
+                          tags:
+                              asd: asd
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: asdff
+                              namespace: asd
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: Test 1
+                                identifier: Test_1
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 1
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                          - step:
+                                type: ShellScript
+                                name: Test 2
+                                identifier: Test_2
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 12
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                      rollbackSteps: []
+              tags:
+                  asd: ""
+                  dsf: ""
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+        - stage:
+              name: Deo Stage 2
+              identifier: Deo_Stage_2
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      useFromStage:
+                          stage: Demo_Stage_1
+                  infrastructure:
+                      environmentRef: prod_environment
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: asdff
+                              namespace: default
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: Step 1
+                                identifier: Step_1
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 2
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                                failureStrategies: []
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
