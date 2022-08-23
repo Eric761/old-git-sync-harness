@@ -19,9 +19,9 @@ pipeline:
                   identifier: stp1
                   spec:
                     url: <+input>
-                    method: GET
+                    method: <+input>
                     headers: []
                     outputVariables: []
-                    requestBody: khbb
-                  timeout: 10m
+                    requestBody: <+input>
+                  timeout: <+input>
         tags: {}
