@@ -23,7 +23,11 @@ pipeline:
                   identifier: infraAws
                   type: SshWinRmAws
                   spec:
+                    connectorRef: <+input>
                     credentialsRef: <+input>
+                    region: <+input>
+                    awsInstanceFilter:
+                      tags: <+input>
           execution:
             steps:
               - step:
