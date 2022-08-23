@@ -19,11 +19,6 @@ pipeline:
             deployToAll: false
             infrastructureDefinitions:
               - identifier: infraAws
-                inputs:
-                  identifier: infraAws
-                  type: SshWinRmAws
-                  spec:
-                    credentialsRef: <+input>
           execution:
             steps:
               - step:
