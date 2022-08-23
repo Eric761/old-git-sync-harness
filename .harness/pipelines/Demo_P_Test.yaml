@@ -1,0 +1,353 @@
+pipeline:
+    name: Demo P Test
+    identifier: Demo_P_Test
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: Test
+              identifier: Test
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: dd
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                              artifacts: {}
+                  infrastructure:
+                      environmentRef: test
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: asdff
+                              namespace: asd
+                              releaseName: release-<+INFRA_KEY>
+                          provisioner:
+                              steps:
+                                  - step:
+                                        type: TerraformPlan
+                                        name: test
+                                        identifier: test
+                                        timeout: 10m
+                                        spec:
+                                            provisionerIdentifier: tea
+                                            configuration:
+                                                command: Apply
+                                                configFiles:
+                                                    store:
+                                                        type: Github
+                                                        spec:
+                                                            gitFetchType: Branch
+                                                            connectorRef: Kapil_Test
+                                                            branch: asd
+                                                            folderPath: asd
+                                                secretManagerRef: harnessSecretManager
+                                  - step:
+                                        type: HarnessApproval
+                                        name: dfff
+                                        identifier: dfff
+                                        timeout: 1d
+                                        spec:
+                                            approvalMessage: test
+                                            includePipelineExecutionHistory: true
+                                            approvers:
+                                                userGroups:
+                                                    - account.ug1
+                                                minimumCount: 1
+                                                disallowPipelineExecutor: true
+                                            approverInputs: []
+                                  - step:
+                                        type: TerraformApply
+                                        name: asfddf
+                                        identifier: asfddf
+                                        timeout: 10m
+                                        spec:
+                                            provisionerIdentifier: sdf
+                                            configuration:
+                                                type: InheritFromPlan
+                              rollbackSteps:
+                                  - step:
+                                        type: TerraformRollback
+                                        name: asd
+                                        identifier: asd
+                                        timeout: 10m
+                                        spec:
+                                            provisionerIdentifier: asd
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 1
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                                failureStrategies: []
+                          - step:
+                                type: HarnessApproval
+                                name: sdfsdf
+                                identifier: sdfsdf
+                                spec:
+                                    approvalMessage: Please review the following information and approve the pipeline progression
+                                    includePipelineExecutionHistory: true
+                                    approvers:
+                                        userGroups:
+                                            - account.ug_hello
+                                        minimumCount: 1
+                                        disallowPipelineExecutor: false
+                                    approverInputs: []
+                                timeout: 1d
+                          - parallel:
+                                - step:
+                                      type: ShellScript
+                                      name: test2
+                                      identifier: test2
+                                      spec:
+                                          shell: Bash
+                                          onDelegate: true
+                                          source:
+                                              type: Inline
+                                              spec:
+                                                  script: <+input>
+                                          environmentVariables: []
+                                          outputVariables: []
+                                          executionTarget: {}
+                                      timeout: 10m
+                                      when:
+                                          stageStatus: All
+                                          condition: <+stage.currentStatus> == "ERRORED" || <+stage.currentStatus> == "FAILED"
+                                      failureStrategies: []
+                                - step:
+                                      type: Http
+                                      name: teas
+                                      identifier: teas
+                                      spec:
+                                          url: https://google.com
+                                          method: GET
+                                          headers: []
+                                          outputVariables: []
+                                      timeout: 10s
+                          - stepGroup:
+                                name: SG1
+                                identifier: SG1
+                                steps:
+                                    - step:
+                                          type: Http
+                                          name: httt
+                                          identifier: httt
+                                          spec:
+                                              url: https://google.com
+                                              method: GET
+                                              headers: []
+                                              outputVariables: []
+                                          timeout: 10s
+                                    - parallel:
+                                          - step:
+                                                type: ShellScript
+                                                name: asdaa
+                                                identifier: asdaa
+                                                spec:
+                                                    shell: Bash
+                                                    onDelegate: true
+                                                    source:
+                                                        type: Inline
+                                                        spec:
+                                                            script: echo 2
+                                                    environmentVariables: []
+                                                    outputVariables: []
+                                                    executionTarget: {}
+                                                timeout: 10m
+                                          - step:
+                                                type: ShellScript
+                                                name: asdf
+                                                identifier: asdf
+                                                spec:
+                                                    shell: Bash
+                                                    onDelegate: true
+                                                    source:
+                                                        type: Inline
+                                                        spec:
+                                                            script: echo 2
+                                                    environmentVariables: []
+                                                    outputVariables: []
+                                                    executionTarget: {}
+                                                timeout: 10m
+                                spec: {}
+                                rollbackSteps:
+                                    - step:
+                                          type: ShellScript
+                                          name: echo 2
+                                          identifier: echo_2
+                                          spec:
+                                              shell: Bash
+                                              onDelegate: true
+                                              source:
+                                                  type: Inline
+                                                  spec:
+                                                      script: echo 12
+                                              environmentVariables: []
+                                              outputVariables: []
+                                              executionTarget: {}
+                                          timeout: 10m
+                          - parallel:
+                                - step:
+                                      type: ShellScript
+                                      name: asdggg
+                                      identifier: asdggg
+                                      spec:
+                                          shell: Bash
+                                          onDelegate: true
+                                          source:
+                                              type: Inline
+                                              spec:
+                                                  script: echo 1
+                                          environmentVariables: []
+                                          outputVariables: []
+                                          executionTarget: {}
+                                      timeout: 10m
+                                - stepGroup:
+                                      name: SG2
+                                      identifier: SG2
+                                      steps:
+                                          - step:
+                                                type: ShellScript
+                                                name: echo 3
+                                                identifier: echo_3
+                                                spec:
+                                                    shell: Bash
+                                                    onDelegate: true
+                                                    source:
+                                                        type: Inline
+                                                        spec:
+                                                            script: echo 3
+                                                    environmentVariables: []
+                                                    outputVariables: []
+                                                    executionTarget: {}
+                                                timeout: 10m
+                          - step:
+                                type: ShellScript
+                                name: kill
+                                identifier: kill
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: exit 1
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                      rollbackSteps:
+                          - step:
+                                type: ShellScript
+                                name: Teas
+                                identifier: Teas
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 1
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                          - parallel:
+                                - step:
+                                      type: ShellScript
+                                      name: gfgh
+                                      identifier: gfgh
+                                      spec:
+                                          shell: Bash
+                                          onDelegate: true
+                                          source:
+                                              type: Inline
+                                              spec:
+                                                  script: echo 1
+                                          environmentVariables: []
+                                          outputVariables: []
+                                          executionTarget: {}
+                                      timeout: 10m
+                                - step:
+                                      type: ShellScript
+                                      name: sdf
+                                      identifier: sdf
+                                      spec:
+                                          shell: Bash
+                                          onDelegate: true
+                                          source:
+                                              type: Inline
+                                              spec:
+                                                  script: echo 2
+                                          environmentVariables: []
+                                          outputVariables: []
+                                          executionTarget: {}
+                                      timeout: 10m
+                  serviceDependencies: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+        - stage:
+              name: Test3
+              identifier: Test3
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      useFromStage:
+                          stage: Test
+                  infrastructure:
+                      environmentRef: test
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: asdff
+                              namespace: asd
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: test
+                                identifier: test
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 1
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+    timeout: 10m
