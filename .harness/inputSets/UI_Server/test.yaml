@@ -1,0 +1,22 @@
+inputSet:
+  identifier: "test"
+  name: "test"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "UI_Server"
+    stages:
+    - stage:
+        identifier: "UI_Service"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: "Kubernetes"
+              spec:
+                artifacts:
+                  primary:
+                    type: "DockerRegistry"
+                    spec:
+                      connectorRef: "harnessImage"
+                      tag: "latest"
