@@ -1,0 +1,20 @@
+inputSet:
+  identifier: "azure_cred"
+  name: "azure cred"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "testAws"
+    stages:
+    - stage:
+        identifier: "sshAws"
+        type: "Deployment"
+        spec:
+          environment:
+            infrastructureDefinitions:
+            - identifier: "azuerCred"
+              inputs:
+                identifier: "azuerCred"
+                type: "SshWinRmAzure"
+                spec:
+                  connectorRef: "<+il>"
