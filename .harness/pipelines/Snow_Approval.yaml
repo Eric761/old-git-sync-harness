@@ -1,0 +1,56 @@
+pipeline:
+    name: Snow Approval
+    identifier: Snow_Approval
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: Test Approval
+              identifier: Test_Approval
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: ServiceNow Approval
+                                identifier: serviceNowApproval
+                                type: ServiceNowApproval
+                                timeout: 1d
+                                spec:
+                                    approvalCriteria:
+                                        type: KeyValues
+                                        spec:
+                                            matchAnyCondition: true
+                                            conditions:
+                                                - key: state
+                                                  operator: equals
+                                                  value: "6"
+                                    rejectionCriteria:
+                                        type: KeyValues
+                                        spec:
+                                            matchAnyCondition: true
+                                            conditions:
+                                                - key: state
+                                                  operator: equals
+                                                  value: "8"
+                                    connectorRef: Test_Snow_Connector
+                                    ticketNumber: INC0081642
+                                    ticketType: INCIDENT
+                          - step:
+                                type: ShellScript
+                                name: Step
+                                identifier: Step
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 1
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+              tags: {}
