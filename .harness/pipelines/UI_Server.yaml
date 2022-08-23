@@ -1,0 +1,117 @@
+pipeline:
+    name: UI Server
+    identifier: UI_Server
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: UI Service
+              identifier: UI_Service
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: web
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                              manifests:
+                                  - manifest:
+                                        identifier: K8s
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: Kapil_Test
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - etc/asd
+                                                    branch: master
+                                            skipResourceVersioning: false
+                                  - manifest:
+                                        identifier: values
+                                        type: Values
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: Kapil_Test
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - etc/asd
+                                                    branch: master
+                              artifacts:
+                                  primary:
+                                      type: DockerRegistry
+                                      spec:
+                                          connectorRef: <+input>
+                                          imagePath: library/nginx
+                                          tag: <+input>
+                  infrastructure:
+                      environmentRef: prod_environment
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: Test222
+                              namespace: default
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - stepGroup:
+                                name: Canary Deployment
+                                identifier: canaryDepoyment
+                                steps:
+                                    - step:
+                                          name: Canary Deployment
+                                          identifier: canaryDeployment
+                                          type: K8sCanaryDeploy
+                                          timeout: 10m
+                                          spec:
+                                              instanceSelection:
+                                                  type: Count
+                                                  spec:
+                                                      count: 1
+                                              skipDryRun: false
+                                    - step:
+                                          name: Canary Delete
+                                          identifier: canaryDelete
+                                          type: K8sCanaryDelete
+                                          timeout: 10m
+                                          spec: {}
+                                rollbackSteps:
+                                    - step:
+                                          name: Canary Delete
+                                          identifier: rollbackCanaryDelete
+                                          type: K8sCanaryDelete
+                                          timeout: 10m
+                                          spec: {}
+                          - stepGroup:
+                                name: Primary Deployment
+                                identifier: primaryDepoyment
+                                steps:
+                                    - step:
+                                          name: Rolling Deployment
+                                          identifier: rollingDeployment
+                                          type: K8sRollingDeploy
+                                          timeout: 10m
+                                          spec:
+                                              skipDryRun: false
+                                rollbackSteps:
+                                    - step:
+                                          name: Rolling Rollback
+                                          identifier: rollingRollback
+                                          type: K8sRollingRollback
+                                          timeout: 10m
+                                          spec: {}
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
