@@ -1,0 +1,17 @@
+template:
+    name: template-test2
+    identifier: templatetest2
+    versionLabel: v2
+    type: Step
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    description: null
+    tags: {}
+    spec:
+        type: Http
+        timeout: 10s
+        spec:
+            url: https://www.google.com
+            method: GET
+            headers: []
+            outputVariables: []
