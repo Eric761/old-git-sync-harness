@@ -23,5 +23,5 @@ pipeline:
                     outputVariables: []
                     requestBody: <+input>
                     method: GET
-                  timeout: <+input>
+                  timeout: 10m
         tags: {}
