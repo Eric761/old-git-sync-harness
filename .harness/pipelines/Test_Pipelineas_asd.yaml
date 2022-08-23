@@ -1,0 +1,90 @@
+pipeline:
+    name: Test Pipelineas asd
+    identifier: Test_Pipelineas_asd
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: qa
+              identifier: qa
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              manifestOverrideSets: []
+                              manifests:
+                                  - manifest:
+                                        identifier: asd
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: <+input>
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - sdf
+                                                    repoName: <+input>
+                                                    branch: asd
+                                            skipResourceVersioning: false
+                              artifacts:
+                                  sidecars: []
+                                  primary:
+                                      type: DockerRegistry
+                                      spec:
+                                          connectorRef: <+input>
+                                          imagePath: sdf
+                                          tag: <+input>
+                              variables:
+                                  - name: asd
+                                    type: String
+                                    default: asdd
+                                    value: <+input>
+                      serviceRef: uuyyy
+                  infrastructure:
+                      environment:
+                          name: df
+                          identifier: asd
+                          type: Production
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: <+input>
+                              namespace: <+input>
+                              releaseName: asd
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: asd
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: sdfsdf
+                                identifier: sdfsdf
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo 1
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: <+input>
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+    variables:
+        - name: Test
+          type: String
+          default: test
+          value: <+input>.allowedValues(asdasd,test)
