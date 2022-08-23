@@ -1,0 +1,20 @@
+inputSet:
+  identifier: "ikok"
+  name: "ikok"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "testAws"
+    stages:
+    - stage:
+        identifier: "sshAws"
+        type: "Deployment"
+        spec:
+          environment:
+            infrastructureDefinitions:
+            - identifier: "infraDev"
+              inputs:
+                identifier: "infraDev"
+                type: "Pdc"
+                spec:
+                  connectorRef: "pdcTest"
