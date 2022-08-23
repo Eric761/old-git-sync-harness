@@ -1,0 +1,17 @@
+inputSet:
+  identifier: "test"
+  pipeline:
+    identifier: "New_Delegate_Test_1"
+    variables:
+    - name: "Test1"
+      type: "String"
+      value: "test1"
+    - name: "Test2"
+      type: "String"
+      value: "test2"
+    - name: "Test3"
+      type: "String"
+      value: "test3"
+  name: "test"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
