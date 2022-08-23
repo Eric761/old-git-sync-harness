@@ -1,0 +1,96 @@
+pipeline:
+    name: asd
+    identifier: asd
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: asd
+              identifier: asd
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: asdddff
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables:
+                                  - name: resourceNamePrefix
+                                    type: String
+                                    value: test
+                                  - name: test
+                                    type: String
+                                    value: asd
+                              manifests:
+                                  - manifest:
+                                        identifier: Manifest
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: <+input>
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - test/k8sDeploymentType/k8s/basic/templates/deployment.yaml
+                                                    repoName: <+input>
+                                                    branch: <+input>
+                                            skipResourceVersioning: false
+                                  - manifest:
+                                        identifier: values
+                                        type: Values
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: <+input>
+                                                    gitFetchType: Branch
+                                                    paths: <+input>
+                                                    repoName: <+input>
+                                                    branch: <+input>
+                              artifacts:
+                                  primary:
+                                      type: DockerRegistry
+                                      spec:
+                                          connectorRef: harnessImage
+                                          imagePath: library/nginx
+                                          tag: stable
+                  infrastructure:
+                      environmentRef: test
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: account.qatargetk8s
+                              namespace: default
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                name: Rollout Deployment
+                                identifier: rolloutDeployment
+                                type: K8sRollingDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                                failureStrategies: []
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              variables:
+                  - name: resourceNamePrefix
+                    type: String
+                    value: test
