@@ -1,0 +1,63 @@
+inputSet:
+  identifier: "asdasd"
+  pipeline:
+    identifier: "Test_Project"
+    stages:
+    - stage:
+        identifier: "QA_Stage"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: "Kubernetes"
+              spec:
+                manifests:
+                - manifest:
+                    identifier: "asd"
+                    type: "K8sManifest"
+                    spec:
+                      store:
+                        type: "Github"
+                        spec:
+                          connectorRef: ""
+                          repoName: ""
+                          branch: ""
+                      skipResourceVersioning: ""
+                - manifest:
+                    identifier: "sad"
+                    type: "Values"
+                    spec:
+                      store:
+                        type: "Github"
+                        spec:
+                          connectorRef: ""
+                          repoName: ""
+                          branch: ""
+                artifacts:
+                  primary:
+                    type: "DockerRegistry"
+                    spec:
+                      connectorRef: ""
+                      imagePath: ""
+                      tag: ""
+                variables:
+                - name: "asd"
+                  type: "String"
+                  value: ""
+                - name: "dfg"
+                  type: "Secret"
+                  value: ""
+                - name: "fgh"
+                  type: "Number"
+                  value: ""
+            serviceRef: ""
+    variables:
+    - name: "asd"
+      type: "String"
+      value: "asd"
+    - name: "hgj"
+      type: "Secret"
+      value: ""
+  name: "asdasd"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
