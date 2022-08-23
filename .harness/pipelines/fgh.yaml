@@ -1,0 +1,33 @@
+pipeline:
+    name: fgh
+    identifier: fgh
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: asdas
+              identifier: asdas
+              type: CI
+              spec:
+                  cloneCodebase: false
+                  infrastructure:
+                      type: KubernetesDirect
+                      spec:
+                          connectorRef: Test222
+                          namespace: asd
+                  execution:
+                      steps:
+                          - step:
+                                type: Run
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    connectorRef: asdasd
+                                    image: asd
+                                    command: |-
+                                        asd
+                                        asdasd
+                                        asd
+                                    privileged: false
+                                description: asd
