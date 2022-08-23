@@ -1,0 +1,14 @@
+inputSet:
+  identifier: "test"
+  pipeline:
+    identifier: "Test_Failure"
+    stages:
+    - stage:
+        identifier: "asdasd"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceRef: "AS"
+  name: "test"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
