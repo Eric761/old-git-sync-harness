@@ -18,16 +18,12 @@ pipeline:
             environmentRef: testSshEnv
             deployToAll: false
             infrastructureDefinitions:
-              - identifier: infraAws
+              - identifier: infraDev
                 inputs:
-                  identifier: infraAws
-                  type: SshWinRmAws
+                  identifier: infraDev
+                  type: Pdc
                   spec:
-                    connectorRef: <+input>
                     credentialsRef: <+input>
-                    region: <+input>
-                    awsInstanceFilter:
-                      tags: <+input>
           execution:
             steps:
               - step:
