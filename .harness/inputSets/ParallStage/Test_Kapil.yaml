@@ -1,0 +1,40 @@
+inputSet:
+  identifier: "Test_Kapil"
+  name: "Test Kapil"
+  tags:
+    Test1: ""
+  description: "Description Test"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "ParallStage"
+    stages:
+    - parallel:
+      - stage:
+          identifier: "Stage_1"
+          type: "Deployment"
+          spec:
+            execution:
+              steps:
+              - step:
+                  identifier: "Test"
+                  type: "ShellScript"
+                  spec:
+                    source:
+                      type: "Inline"
+                      spec:
+                        script: "echo 1"
+      - stage:
+          identifier: "Stage_2"
+          type: "Deployment"
+          spec:
+            execution:
+              steps:
+              - step:
+                  identifier: "test"
+                  type: "ShellScript"
+                  spec:
+                    source:
+                      type: "Inline"
+                      spec:
+                        script: "echo 2"
