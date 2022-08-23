@@ -1,0 +1,11 @@
+inputSet:
+  identifier: "asdasdfdf"
+  name: "asdasdfdf"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "Test_Project"
+    variables:
+    - name: "asd"
+      type: "String"
+      value: "asd"
