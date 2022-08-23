@@ -1,0 +1,17 @@
+inputSet:
+  identifier: "sdfsdf"
+  name: "sdfsdf"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "Test_Pipelineas_asd"
+    stages:
+    - stage:
+        identifier: "qa"
+        type: "Deployment"
+        spec:
+          infrastructure:
+            infrastructureDefinition:
+              type: "KubernetesDirect"
+              spec:
+                namespace: "sdfd sdf"
