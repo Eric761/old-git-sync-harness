@@ -1,0 +1,21 @@
+inputSet:
+  identifier: "this_is_the_lengthy_title_for_input_set_name_to_see_if_it_merg"
+  name: "jkdfdkfjkdfjk sdsd dsdsdsd sdsds dsdsd sdsd sdsd sdsd sdsd sds"
+  tags: {}
+  description: "this is the descriptipbgbmfglgfgfgfgf this is the descriptipbgbmfglgfgfgfgf\
+    \ this is the descriptipbgbmfglgfgfgfgf this is the descriptipbgbmfglgfgfgfgf"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "popopoo"
+    stages:
+    - stage:
+        identifier: "lkllklk"
+        type: "Deployment"
+        spec:
+          infrastructure:
+            infrastructureDefinition:
+              type: "KubernetesDirect"
+              spec:
+                connectorRef: "account.arpit2929"
+                namespace: "ladlskdsldks"
