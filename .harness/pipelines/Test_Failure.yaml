@@ -1,0 +1,91 @@
+pipeline:
+    name: Test Failure
+    identifier: Test_Failure
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags:
+        <img src="xyz" />: ""
+    stages:
+        - stage:
+              name: asdasd
+              identifier: asdasd
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              manifestOverrideSets: []
+                              manifests: []
+                              artifacts:
+                                  sidecars: []
+                              variables: []
+                      serviceRef: <+input>
+                  infrastructure:
+                      environmentRef: asd
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: asdff
+                              namespace: asd
+                              releaseName: asd
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: ""
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: |-
+                                                for run in {1..100}; do
+                                                  echo <+pipeline.name>
+                                                  sleep 1
+                                                done
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: <+input>
+                          - step:
+                                type: K8sApply
+                                name: Del
+                                identifier: Del
+                                spec:
+                                    filePaths: <+input>
+                                    skipDryRun: true
+                                    skipSteadyStateCheck: <+input>
+                                timeout: 10m
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              variables: []
+    variables: []
+    description: <img src="xyz" />
+    flowControl:
+        barriers:
+            - name: dfg
+              identifier: dfg
+    notificationRules:
+        - name: adsf
+          pipelineEvents:
+              - type: AllEvents
+          notificationMethod:
+              type: MsTeams
+              spec:
+                  userGroups:
+                      - account.ug_hello
+                  msTeamKeys:
+                      - test
+          enabled: true
