@@ -1,0 +1,22 @@
+inputSet:
+  identifier: "in34c"
+  name: "in34c"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "testAws"
+    stages:
+    - stage:
+        identifier: "sshAws"
+        type: "Deployment"
+        spec:
+          environment:
+            infrastructureDefinitions:
+            - identifier: "infraDev"
+              inputs:
+                identifier: "infraDev"
+                type: "Pdc"
+                spec:
+                  hostFilters: "<+i4rvm>"
+                  connectorRef: "<+in34>"
+                  credentialsRef: "account.identifier"
