@@ -1,0 +1,46 @@
+pipeline:
+    name: TestKapil
+    identifier: TestKapil
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: test
+              identifier: test
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: service1
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                  infrastructure:
+                      environmentRef: ljlkj
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: account.test123
+                              namespace: asd
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: K8sCanaryDelete
+                                name: test
+                                identifier: test
+                                spec:
+                                    skipDryRun: false
+                                timeout: 10m
+                      rollbackSteps: []
+                  serviceDependencies: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
