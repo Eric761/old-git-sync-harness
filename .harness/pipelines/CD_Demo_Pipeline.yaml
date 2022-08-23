@@ -1,0 +1,365 @@
+pipeline:
+    name: CD Demo Pipeline
+    identifier: CD_Demo_Pipeline
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags:
+        sample: pipeline
+    stages:
+        - parallel:
+              - stage:
+                    name: K8s Rolling
+                    identifier: K8s_Rolling
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    artifacts:
+                                        sidecars: []
+                                        primary:
+                                            type: DockerRegistry
+                                            spec:
+                                                connectorRef: dockerhub
+                                                imagePath: library/nginx
+                                                tag: <+input>
+                                    variables: []
+                                    manifests:
+                                        - manifest:
+                                              identifier: dev
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Github
+                                                      spec:
+                                                          connectorRef: Rohan_Github
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cdng/
+                                                          branch: main
+                                                  skipResourceVersioning: false
+                                    manifestOverrideSets: []
+                            serviceRef: dd
+                        infrastructure:
+                            environmentRef: test
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: account.builfarm
+                                    namespace: <+input>
+                                    releaseName: rohan-development
+                            allowSimultaneousDeployments: false
+                            infrastructureKey: rohan-k8s
+                        execution:
+                            steps:
+                                - step:
+                                      type: ShellScript
+                                      name: Sample Script
+                                      identifier: Sample_Script
+                                      spec:
+                                          shell: Bash
+                                          onDelegate: true
+                                          source:
+                                              type: Inline
+                                              spec:
+                                                  script: |+
+                                                      echo "Hello World"
+
+                                                      echo " ***** Pipeline Name *****"
+                                                      echo <+pipeline.name>
+
+                                                      echo "***** Service Ref *****"
+                                                      echo <+serviceConfig.serviceRef>
+
+                                                      echo "***** Stage Name *****"
+                                                      echo <+stage.name>
+
+                                          environmentVariables: []
+                                          outputVariables: []
+                                          executionTarget: {}
+                                      timeout: 10m
+                                - step:
+                                      name: Rollout Deployment
+                                      identifier: rolloutDeployment
+                                      type: K8sRollingDeploy
+                                      timeout: 10m
+                                      spec:
+                                          skipDryRun: false
+                                          delegateSelectors: <+input>
+                                      failureStrategies: []
+                                - step:
+                                      type: Http
+                                      name: Check URL
+                                      identifier: Check_URL
+                                      spec:
+                                          url: https://google.com
+                                          method: GET
+                                          headers: []
+                                          outputVariables: []
+                                      timeout: 10s
+                                - step:
+                                      type: K8sDelete
+                                      name: Cleanup Demo
+                                      identifier: Cleanup_Demo
+                                      spec:
+                                          deleteResources:
+                                              type: ReleaseName
+                                              spec:
+                                                  deleteNamespace: false
+                                      timeout: 10m
+                            rollbackSteps:
+                                - step:
+                                      name: Rollback Rollout Deployment
+                                      identifier: rollbackRolloutDeployment
+                                      type: K8sRollingRollback
+                                      timeout: 10m
+                                      spec: {}
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+              - stage:
+                    name: K8s Canary
+                    identifier: K8s_Canary
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    artifacts:
+                                        sidecars: []
+                                        primary:
+                                            type: DockerRegistry
+                                            spec:
+                                                connectorRef: dockerhub
+                                                imagePath: library/nginx
+                                                tag: <+input>
+                                    manifestOverrideSets: []
+                                    manifests:
+                                        - manifest:
+                                              identifier: canary
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Github
+                                                      spec:
+                                                          connectorRef: Rohan_Github
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cdng/
+                                                          branch: main
+                                                  skipResourceVersioning: false
+                                    variables: []
+                            serviceRef: nginx
+                        infrastructure:
+                            environmentRef: Pull_Request
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: Rohan_K8s_Cluster
+                                    namespace: pr-canary
+                                    releaseName: canary-rohan
+                            allowSimultaneousDeployments: false
+                            infrastructureKey: canary-k8s
+                        execution:
+                            steps:
+                                - stepGroup:
+                                      name: Canary Deployment
+                                      identifier: canaryDepoyment
+                                      steps:
+                                          - step:
+                                                name: Canary Deployment
+                                                identifier: canaryDeployment
+                                                type: K8sCanaryDeploy
+                                                timeout: 10m
+                                                spec:
+                                                    instanceSelection:
+                                                        type: Count
+                                                        spec:
+                                                            count: 1
+                                                    skipDryRun: false
+                                          - step:
+                                                name: Canary Delete
+                                                identifier: canaryDelete
+                                                type: K8sCanaryDelete
+                                                timeout: 10m
+                                                spec: {}
+                                      rollbackSteps:
+                                          - step:
+                                                name: Canary Delete
+                                                identifier: canaryDelete
+                                                type: K8sCanaryDelete
+                                                timeout: 10m
+                                                spec: {}
+                                - stepGroup:
+                                      name: Primary Deployment
+                                      identifier: primaryDepoyment
+                                      steps:
+                                          - step:
+                                                name: Rolling Deployment
+                                                identifier: rollingDeployment
+                                                type: K8sRollingDeploy
+                                                timeout: 10m
+                                                spec:
+                                                    skipDryRun: false
+                                      rollbackSteps:
+                                          - step:
+                                                name: Rolling Rollback
+                                                identifier: rollingRollback
+                                                type: K8sRollingRollback
+                                                timeout: 10m
+                                                spec: {}
+                                - parallel:
+                                      - step:
+                                            type: Http
+                                            name: Check Google
+                                            identifier: Check_Google
+                                            spec:
+                                                url: https://google.com
+                                                method: GET
+                                                headers: []
+                                                outputVariables: []
+                                            timeout: 10s
+                                      - step:
+                                            type: ShellScript
+                                            name: K8s details
+                                            identifier: K8s_details
+                                            spec:
+                                                shell: Bash
+                                                onDelegate: true
+                                                source:
+                                                    type: Inline
+                                                    spec:
+                                                        script: |+
+                                                            kubectl cluster-info
+
+                                                environmentVariables: []
+                                                outputVariables: []
+                                                executionTarget: {}
+                                            timeout: 10m
+                                - step:
+                                      type: K8sDelete
+                                      name: Cleanup Canary
+                                      identifier: Cleanup_Canary
+                                      spec:
+                                          deleteResources:
+                                              type: ReleaseName
+                                              spec:
+                                                  deleteNamespace: false
+                                      timeout: 10m
+                            rollbackSteps: []
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+        - stage:
+              name: Terraform
+              identifier: Terraform
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              artifacts:
+                                  sidecars: []
+                              manifestOverrideSets: []
+                              manifests: []
+                              variables: []
+                      serviceRef: terraform
+                  infrastructure:
+                      environmentRef: sandbox
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: Rohan_K8s_Cluster
+                              namespace: rohan-dev
+                              releaseName: nginx-rohan
+                          provisioner:
+                              steps:
+                                  - step:
+                                        type: TerraformPlan
+                                        name: GCS Bucket Plan
+                                        identifier: GCS_Bucket_Plan
+                                        spec:
+                                            configuration:
+                                                command: Apply
+                                                configFiles:
+                                                    store:
+                                                        type: Github
+                                                        spec:
+                                                            gitFetchType: Branch
+                                                            connectorRef: Terraform
+                                                            branch: master
+                                                            folderPath: gcs/
+                                                secretManagerRef: harnessSecretManager
+                                            provisionerIdentifier: s3-rohan
+                                        timeout: 10m
+                                  - step:
+                                        type: TerraformApply
+                                        name: Create GCS Bucket
+                                        identifier: Create_GCS_Bucket
+                                        spec:
+                                            provisionerIdentifier: s3-rohan
+                                            configuration:
+                                                type: InheritFromPlan
+                                        timeout: 10m
+                                        when:
+                                            stageStatus: Success
+                                            condition: <+stage.variables.skipCreate> == false
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: rohan-s3
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: S3 Complete
+                                identifier: S3_Complete
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo "Done Provisioning the S3 Bucket!"
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              when:
+                  pipelineStatus: Success
+                  condition: <+pipeline.variables.skipInfra> == false
+              variables:
+                  - name: skipCreate
+                    type: String
+                    value: <+input>.allowedValues(true,false)
+    variables:
+        - name: skipInfra
+          type: String
+          default: ""
+          value: <+input>.allowedValues(true,false)
