@@ -19,4 +19,3 @@ inputSet:
                   url: "https://b.m"
                   method: "GET"
                   requestBody: "grte"
-                timeout: "10m"
