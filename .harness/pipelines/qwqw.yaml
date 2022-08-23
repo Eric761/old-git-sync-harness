@@ -1,0 +1,59 @@
+pipeline:
+    name: qwqw
+    identifier: qwqw
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: s
+              identifier: s
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: dd
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                  infrastructure:
+                      environmentRef: fdsggg
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: asdddd
+                              namespace: s
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                name: Stage Deployment
+                                identifier: stageDeployment
+                                type: K8sBlueGreenDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                          - step:
+                                name: Swap primary with stage service
+                                identifier: bgSwapServices
+                                type: K8sBGSwapServices
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                      rollbackSteps:
+                          - step:
+                                name: Swap primary with stage service
+                                identifier: rollbackBgSwapServices
+                                type: K8sBGSwapServices
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
