@@ -1,0 +1,67 @@
+pipeline:
+    name: Test Apply Cool
+    identifier: Test_Apply_Cool
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: Test
+              identifier: Test
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              artifacts:
+                                  sidecars: []
+                              variables: []
+                              manifestOverrideSets: []
+                              manifests: []
+                      serviceRef: jj
+                  infrastructure:
+                      environmentRef: sdf
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: <+input>
+                              namespace: asd
+                              releaseName: asd
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: ""
+                  execution:
+                      steps:
+                          - step:
+                                name: Rollout Deployment
+                                identifier: rolloutDeployment
+                                type: K8sRollingDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                          - step:
+                                type: K8sDelete
+                                name: K8s Delete
+                                identifier: K8s_Delete
+                                spec:
+                                    deleteResources:
+                                        type: ResourceName
+                                        spec:
+                                            resourceNames:
+                                                - <+input>
+                                timeout: 10m
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
