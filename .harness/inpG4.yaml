@@ -18,4 +18,3 @@ inputSet:
                 spec:
                   url: "https://m.n"
                   requestBody: "q3rf"
-                timeout: "10m"
