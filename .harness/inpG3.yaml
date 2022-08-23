@@ -18,4 +18,3 @@ inputSet:
                 spec:
                   url: "https://b.m"
                   requestBody: "grte"
-                timeout: "10m"
