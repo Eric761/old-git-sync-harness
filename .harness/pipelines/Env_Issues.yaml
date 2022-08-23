@@ -1,0 +1,97 @@
+pipeline:
+    name: Env Issues
+    identifier: Env_Issues
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - parallel:
+              - stage:
+                    name: Test Stage
+                    identifier: Test_Stage
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceRef: web
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    variables: []
+                        infrastructure:
+                            environmentRef: <+input>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: test1111
+                                    namespace: default
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      type: ShellScript
+                                      name: SH Script
+                                      identifier: SH_Script
+                                      spec:
+                                          shell: Bash
+                                          onDelegate: true
+                                          source:
+                                              type: Inline
+                                              spec:
+                                                  script: echo 1
+                                          environmentVariables: []
+                                          outputVariables: []
+                                          executionTarget: {}
+                                      timeout: 10m
+                            rollbackSteps: []
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+              - stage:
+                    name: Parallel Stage
+                    identifier: Parallel_Stage
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            useFromStage:
+                                stage: Test_Stage
+                        infrastructure:
+                            environmentRef: <+pipeline.stages.Test_Stage.spec.infrastructure.environmentRef>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: test1111
+                                    namespace: default
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      type: ShellScript
+                                      name: SH2
+                                      identifier: SH2
+                                      spec:
+                                          shell: Bash
+                                          onDelegate: true
+                                          source:
+                                              type: Inline
+                                              spec:
+                                                  script: echo 2
+                                          environmentVariables: []
+                                          outputVariables: []
+                                          executionTarget: {}
+                                      timeout: 10m
+                            rollbackSteps: []
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
