@@ -1,0 +1,220 @@
+pipeline:
+    name: tf plan inherit apply
+    identifier: tf_plan_inherit_apply
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: s1
+              identifier: s1
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              manifestOverrideSets: []
+                              manifests:
+                                  - manifest:
+                                        identifier: m1
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: vaibhavtest
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - fp1
+                                                    branch: b1
+                                            skipResourceVersioning: false
+                              artifacts:
+                                  sidecars: []
+                              variables: []
+                      serviceRef: dd
+                  infrastructure:
+                      environmentRef: test
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          provisioner:
+                              steps:
+                                  - step:
+                                        type: ShellScript
+                                        name: test
+                                        identifier: test
+                                        timeout: 10m
+                                        spec:
+                                            shell: Bash
+                                            onDelegate: true
+                                            source:
+                                                type: Inline
+                                                spec:
+                                                    script: echo hi
+                                            environmentVariables: []
+                                            outputVariables: []
+                                            executionTarget: {}
+                                  - step:
+                                        type: TerraformRollback
+                                        name: tf rollback
+                                        identifier: tf_rollback
+                                        spec:
+                                            provisionerIdentifier: vbPlanInheritApproveW1
+                                        timeout: 10m
+                                        when:
+                                            stageStatus: Success
+                                            condition: "true"
+                                        failureStrategies: []
+                                  - step:
+                                        type: TerraformPlan
+                                        name: Terraform Plan
+                                        identifier: tf_plan
+                                        timeout: 10m
+                                        spec:
+                                            provisionerIdentifier: vbPlanInheritApproveW1
+                                            configuration:
+                                                command: Apply
+                                                workspace: w1
+                                                configFiles:
+                                                    store:
+                                                        type: Github
+                                                        spec:
+                                                            branch: master
+                                                            connectorRef: <+pipeline.variables.connectorRef>
+                                                            gitFetchType: Branch
+                                                            folderPath: test/remoteState/
+                                                secretManagerRef: account.harnessSecretManager
+                                                backendConfig:
+                                                    type: Inline
+                                                    spec:
+                                                        content: |-
+                                                            bucket="terraform-test-vaibhav"
+                                                            key="ng-test-10.tfstate"
+                                                            access_key="<+secrets.getValue("account.access_key")>"
+                                                            secret_key="<+secrets.getValue("account.secret_key")>"
+                                                varFiles:
+                                                    - varFile:
+                                                          type: Remote
+                                                          identifier: file2
+                                                          spec:
+                                                              store:
+                                                                  type: Github
+                                                                  spec:
+                                                                      connectorRef: <+pipeline.variables.connectorRef>
+                                                                      gitFetchType: Branch
+                                                                      branch: master
+                                                                      paths:
+                                                                          - test/remoteState/values.tfvars
+                                                    - varFile:
+                                                          type: Inline
+                                                          identifier: file1
+                                                          spec:
+                                                              content: |-
+                                                                  aws_access_key = "<+secrets.getValue("account.access_key")>"
+                                                                  aws_secret_key = "<+secrets.getValue("account.secret_key")>"
+                                                                  instance_type="test"
+                                                                  tag_name="vb-local"                      
+                                        when:
+                                            stageStatus: Success
+                                            condition: "true"
+                                  - step:
+                                        type: ShellScript
+                                        name: testshell
+                                        identifier: testshell
+                                        spec:
+                                            shell: Bash
+                                            onDelegate: true
+                                            source:
+                                                type: Inline
+                                                spec:
+                                                    script: |-
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.tf_plan.spec.provisionerIdentifier>
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.tf_plan.timeout>
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.tf_plan.spec.configuration.configFiles.store.spec.connectorRef>
+                                                        echo <+<+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.tf_plan.spec.configuration.configFiles.store.spec.branch>>    
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.tf_plan.spec.configuration.varFiles.file2.spec.store.spec.branch>
+                                                        echo <+steps.tf_plan.spec.configuration.configFiles.store.spec.connectorRef>
+                                            environmentVariables: []
+                                            outputVariables: []
+                                            executionTarget: {}
+                                        timeout: 10m
+                                        when:
+                                            stageStatus: Success
+                                            condition: "true"
+                                  - step:
+                                        type: TerraformApply
+                                        name: apply123
+                                        identifier: apply123
+                                        spec:
+                                            provisionerIdentifier: vbPlanInheritApproveW1
+                                            configuration:
+                                                type: InheritFromPlan
+                                        timeout: 10m
+                                        when:
+                                            stageStatus: Success
+                                  - step:
+                                        type: ShellScript
+                                        name: apply test expressions
+                                        identifier: apply_test_expressions
+                                        spec:
+                                            shell: Bash
+                                            onDelegate: true
+                                            source:
+                                                type: Inline
+                                                spec:
+                                                    script: |-
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.apply123.spec.provisionerIdentifier>
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.apply123.timeout>
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.apply123.name>
+                                                        echo <+steps.apply123.name>
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.apply123.output.region>
+                                                        echo <+pipeline.stages.s1.spec.infrastructure.infrastructureDefinition.provisioner.steps.apply123.output.tags.Name>
+                                            environmentVariables: []
+                                            outputVariables: []
+                                            executionTarget: {}
+                                        timeout: 10m
+                                        when:
+                                            stageStatus: Success
+                                  - step:
+                                        type: TerraformDestroy
+                                        name: destroy
+                                        identifier: destroy
+                                        spec:
+                                            provisionerIdentifier: vbPlanInheritApproveW1
+                                            configuration:
+                                                type: InheritFromApply
+                                        timeout: 10m
+                                        when:
+                                            stageStatus: Success
+                                            condition: "true"
+                          spec:
+                              connectorRef: account.k8s
+                              namespace: n1
+                              releaseName: r1
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: k1
+                  execution:
+                      steps:
+                          - step:
+                                type: Http
+                                name: test
+                                identifier: test
+                                timeout: 10s
+                                spec:
+                                    url: https://www.google.com/
+                                    method: GET
+                                    headers: []
+                                    outputVariables: []
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+    variables:
+        - name: connectorRef
+          type: String
+          value: terraform_repo
