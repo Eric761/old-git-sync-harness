@@ -1,0 +1,17 @@
+inputSet:
+  identifier: "IP1"
+  pipeline:
+    identifier: "Test_Apply_Cool"
+    stages:
+    - stage:
+        identifier: "Test"
+        type: "Deployment"
+        spec:
+          infrastructure:
+            infrastructureDefinition:
+              type: "KubernetesDirect"
+              spec:
+                connectorRef: "account.builfarm"
+  name: "IP1"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
