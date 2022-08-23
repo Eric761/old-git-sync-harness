@@ -1,0 +1,145 @@
+pipeline:
+    name: New Delegate Test 1
+    identifier: New_Delegate_Test_1
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags:
+        test: ""
+        test1: ""
+    stages:
+        - stage:
+              name: Demo Stage 1
+              identifier: Demo_Stage_1
+              description: |
+                  asdffdsf
+                  sdfa
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables:
+                                  - name: runAsUser
+                                    type: String
+                                    value: <+input>
+                              manifests: []
+                              artifacts: {}
+                      service:
+                          identifier: test1
+                          name: test
+                          tags:
+                              test: ""
+                  infrastructure:
+                      environment:
+                          name: test
+                          identifier: teee
+                          type: PreProduction
+                          tags:
+                              asd: asd
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: asdddd
+                              namespace: asd
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: Test 1
+                                identifier: Test_1
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: |-
+                                                echo 1
+                                                sleep 180
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                          - step:
+                                name: Test 2
+                                identifier: Test_2
+                                template:
+                                    templateRef: Echo_Template
+                                    versionLabel: V1
+                                    templateInputs:
+                                        type: ShellScript
+                                        spec:
+                                            source:
+                                                type: Inline
+                                                spec:
+                                                    script: <+input>
+                          - step:
+                                type: Http
+                                name: Test
+                                identifier: Test
+                                spec:
+                                    url: https://google.com
+                                    method: GET
+                                    headers: []
+                                    outputVariables: []
+                                timeout: 10s
+                      rollbackSteps: []
+                  serviceDependencies: []
+              tags:
+                  asd: ""
+                  dsf: ""
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+    variables: []
+    notificationRules:
+        - name: sdf
+          pipelineEvents:
+              - type: AllEvents
+          notificationMethod:
+              type: Slack
+              spec:
+                  userGroups: []
+                  webhookUrl: http://sdf.com
+          enabled: true
+        - name: Slack
+          pipelineEvents:
+              - type: AllEvents
+          notificationMethod:
+              type: Slack
+              spec:
+                  userGroups: []
+                  webhookUrl: https://google.com
+          enabled: true
+        - name: fgdfg
+          pipelineEvents:
+              - type: AllEvents
+          notificationMethod:
+              type: MsTeams
+              spec:
+                  userGroups: []
+                  msTeamKeys:
+                      - https://googl.ecom
+          enabled: true
+        - name: Test MSTeams
+          pipelineEvents:
+              - type: AllEvents
+          notificationMethod:
+              type: MsTeams
+              spec:
+                  userGroups:
+                      - account.ug_hello
+                      - account.ug1
+                  msTeamKeys:
+                      - https://harnessinc.webhook.office.com/webhookb2/24f650b7-95cd-43d5-90c8-f08baf445476@b229b2bb-5f33-4d22-bce0-730f6474e906/IncomingWebhook/026b095aeaa94a259b08d2cb79cdf84b/1cf4605b-aae0-49bb-bf31-d274d5741bd9
+          enabled: true
+    flowControl:
+        barriers:
+            - name: test ba
+              identifier: test_ba
