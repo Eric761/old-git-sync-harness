@@ -1,0 +1,66 @@
+inputSet:
+  identifier: "Test"
+  pipeline:
+    identifier: "LightwingNew"
+    stages:
+    - stage:
+        identifier: "LightwingAPI"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: "Kubernetes"
+              spec:
+                artifacts:
+                  primary:
+                    type: "Gcr"
+                    spec:
+                      tag: "test"
+    - stage:
+        identifier: "LightwingFaktory"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: "Kubernetes"
+              spec:
+                artifacts:
+                  primary:
+                    type: "Gcr"
+                    spec:
+                      tag: "test"
+    - stage:
+        identifier: "LightwingFaktoryWorker"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: "Kubernetes"
+              spec:
+                artifacts:
+                  primary:
+                    type: "Gcr"
+                    spec:
+                      tag: "test1"
+    variables:
+    - name: "ENV"
+      type: "String"
+      value: "uat"
+    - name: "availabilityType"
+      type: "String"
+      value: "primary"
+    - name: "Service2Deploy"
+      type: "String"
+      value: "LW_API_WORKER"
+    - name: "Connector"
+      type: "String"
+      value: "uatprivate"
+    - name: "ReleaseName"
+      type: "String"
+      value: "asd"
+    - name: "namespace"
+      type: "String"
+      value: "lightwing"
+  name: "Test"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
