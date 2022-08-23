@@ -22,6 +22,6 @@ pipeline:
                     method: GET
                     headers: []
                     outputVariables: []
-                    requestBody: <+input>
+                    requestBody: khbb
                   timeout: <+input>
         tags: {}
