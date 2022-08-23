@@ -1,0 +1,58 @@
+pipeline:
+    name: Testpipeline
+    identifier: Testpipeline
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: dev
+              identifier: dev
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              manifestOverrideSets: []
+                              manifests: []
+                              artifacts:
+                                  sidecars: []
+                                  primary:
+                                      type: DockerRegistry
+                                      spec:
+                                          connectorRef: harnessImage
+                                          imagePath: library/nginx
+                                          tag: <+input>
+                      serviceRef: <+input>
+                  infrastructure:
+                      environmentRef: <+input>
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: <+input>
+                              namespace: dde
+                              releaseName: ded3
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: ""
+                  execution:
+                      steps:
+                          - step:
+                                type: Http
+                                name: http
+                                identifier: http
+                                spec:
+                                    url: <+input>
+                                    method: GET
+                                    headers: []
+                                    outputVariables: []
+                                timeout: 10s
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
