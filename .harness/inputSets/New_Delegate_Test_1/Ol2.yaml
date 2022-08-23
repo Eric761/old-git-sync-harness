@@ -1,0 +1,10 @@
+overlayInputSet:
+    name: Ol2
+    identifier: Ol2
+    orgIdentifier: default
+    projectIdentifier: Kapil
+    pipelineIdentifier: New_Delegate_Test_1
+    inputSetReferences:
+        - Ip2
+        - New_IP
+    tags: {}
