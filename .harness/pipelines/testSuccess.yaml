@@ -1,0 +1,53 @@
+pipeline:
+    name: testSuccess
+    identifier: testSuccess
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: stg1
+              identifier: stg1
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: s1
+                      serviceDefinition:
+                          spec:
+                              variables: []
+                          type: Kubernetes
+                  infrastructure:
+                      environmentRef: "e1"
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: test1111
+                              namespace: def1
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: step1
+                                identifier: step1
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo "hello"
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
