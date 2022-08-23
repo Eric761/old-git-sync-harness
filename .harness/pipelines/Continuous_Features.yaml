@@ -1,0 +1,808 @@
+pipeline:
+    name: Continuous Features
+    identifier: Continuous_Features
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: JiraApproval
+              identifier: JiraApproval
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: Jira Create
+                                identifier: jiraCreate
+                                type: JiraCreate
+                                timeout: 5m
+                                spec:
+                                    connectorRef: JiraOperations
+                                    projectKey: FFM
+                                    issueType: Story
+                                    fields:
+                                        - name: Summary
+                                          value: "CF deployment for <+pipeline.variables.ENV> "
+                                        - name: Description
+                                          value: "CF deployment for <+pipeline.variables.ENV> "
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                failureStrategies: []
+                          - step:
+                                name: Jira Update
+                                identifier: jiraUpdate
+                                type: JiraUpdate
+                                timeout: 5m
+                                spec:
+                                    connectorRef: JiraOperations
+                                    issueKey: <+pipeline.stages.JiraApproval.spec.execution.steps.jiraCreate.issue.key>
+                                    transitionTo:
+                                        transitionName: ""
+                                        status: Under Review
+                                    fields: []
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                failureStrategies: []
+                          - step:
+                                name: Jira Approval
+                                identifier: jiraApproval
+                                type: JiraApproval
+                                timeout: 1d
+                                spec:
+                                    approvalCriteria:
+                                        type: KeyValues
+                                        spec:
+                                            matchAnyCondition: true
+                                            conditions:
+                                                - key: Status
+                                                  operator: equals
+                                                  value: Approved
+                                    rejectionCriteria:
+                                        type: KeyValues
+                                        spec:
+                                            matchAnyCondition: true
+                                            conditions:
+                                                - key: Status
+                                                  operator: equals
+                                                  value: Rejected
+                                    connectorRef: JiraOperations
+                                    projectKey: FFM
+                                    issueType: Story
+                                    issueKey: <+pipeline.stages.JiraApproval.spec.execution.steps.jiraCreate.issue.key>
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                failureStrategies: []
+                  serviceDependencies: []
+              tags: {}
+        - stage:
+              name: Collect Collector Ref
+              identifier: Collect_CollectorRef
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                              manifests: []
+                              artifacts: {}
+                      serviceRef: shell_script_common_service
+                  infrastructure:
+                      environmentRef: <+pipeline.variables.ENV>
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: <+input>
+                              namespace: <+pipeline.variables.namespace>
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: Get ConnectRef
+                                identifier: Get_Primary_NG_Manager_Version
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: echo <+infra.connectorRef>
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                timeout: 10m
+                                failureStrategies: []
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+                  serviceDependencies: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+        - parallel:
+              - stage:
+                    name: Postgres Migration
+                    identifier: Postgres_Migration
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceRef: cf_psql_migrate
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    variables: []
+                                    manifests:
+                                        - manifest:
+                                              identifier: cf_psql_migrate_manifest
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/cf-psql-migrate
+                                                          branch: master
+                                                  skipResourceVersioning: false
+                                        - manifest:
+                                              identifier: all_cf_psql_migrate_values
+                                              type: Values
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/all-services.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-psql-migrate/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-psql-migrate/<+pipeline.variables.availabilityType>/values.yaml
+                                                          branch: master
+                                    artifacts:
+                                        primary:
+                                            type: Gcr
+                                            spec:
+                                                connectorRef: Platform_Viewer
+                                                imagePath: platform-205701/harness/saas-openjdk-8u242/ff-server-primary-db-migration
+                                                registryHostname: us.gcr.io
+                                                tag: <+input>
+                        infrastructure:
+                            environmentRef: <+pipeline.variables.ENV>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: <+pipeline.stages.Collect_CollectorRef.spec.infrastructure.infrastructureDefinition.spec.connectorRef>
+                                    namespace: <+pipeline.variables.namespace>
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      type: K8sDelete
+                                      name: Delete Old Jobs
+                                      identifier: Delete_Old_Jobs
+                                      spec:
+                                          deleteResources:
+                                              type: ResourceName
+                                              spec:
+                                                  resourceNames:
+                                                      - <+infra.namespace>/Job/ff-primary-db-migration
+                                      timeout: 10m
+                                      failureStrategies:
+                                          - onFailure:
+                                                errors:
+                                                    - AllErrors
+                                                action:
+                                                    type: Ignore
+                                - step:
+                                      name: Rollout Deployment
+                                      identifier: rolloutDeployment
+                                      type: K8sRollingDeploy
+                                      timeout: 10m
+                                      spec:
+                                          skipDryRun: false
+                            rollbackSteps:
+                                - step:
+                                      name: Rollback Rollout Deployment
+                                      identifier: rollbackRolloutDeployment
+                                      type: K8sRollingRollback
+                                      timeout: 10m
+                                      spec: {}
+                        serviceDependencies: []
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+                    when:
+                        pipelineStatus: Success
+                        condition: <+pipeline.variables.availabilityType> == "primary"
+              - stage:
+                    name: TimeScale Migration
+                    identifier: TimeScale_Migration
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    manifests:
+                                        - manifest:
+                                              identifier: cf_ts_migrate_manifest
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/cf-ts-migrate
+                                                          branch: master
+                                                  skipResourceVersioning: false
+                                        - manifest:
+                                              identifier: all_cf_ts_migrate_values
+                                              type: Values
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/all-services.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-ts-migrate/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-ts-migrate/<+pipeline.variables.availabilityType>/values.yaml
+                                                          branch: master
+                                    artifacts:
+                                        primary:
+                                            type: Gcr
+                                            spec:
+                                                connectorRef: Platform_Viewer
+                                                imagePath: platform-205701/harness/saas-openjdk-8u242/ff-server-analytics-db-migration
+                                                registryHostname: us.gcr.io
+                                                tag: <+input>
+                                    variables: []
+                            serviceRef: cf_ts_migrate
+                        infrastructure:
+                            environmentRef: <+pipeline.variables.ENV>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: <+pipeline.stages.Collect_CollectorRef.spec.infrastructure.infrastructureDefinition.spec.connectorRef>
+                                    namespace: <+pipeline.variables.namespace>
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      type: K8sDelete
+                                      name: Delete Old Jobs
+                                      identifier: Delete_Old_Jobs
+                                      spec:
+                                          deleteResources:
+                                              type: ResourceName
+                                              spec:
+                                                  resourceNames:
+                                                      - <+infra.namespace>/Job/ff-timescale-db-migration
+                                      timeout: 10m
+                                      failureStrategies:
+                                          - onFailure:
+                                                errors:
+                                                    - AllErrors
+                                                action:
+                                                    type: Ignore
+                                - step:
+                                      name: Rollout Deployment
+                                      identifier: rolloutDeployment
+                                      type: K8sRollingDeploy
+                                      timeout: 10m
+                                      spec:
+                                          skipDryRun: false
+                            rollbackSteps:
+                                - step:
+                                      name: Rollback Rollout Deployment
+                                      identifier: rollbackRolloutDeployment
+                                      type: K8sRollingRollback
+                                      timeout: 10m
+                                      spec: {}
+                        serviceDependencies: []
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+                    when:
+                        pipelineStatus: Success
+                        condition: <+pipeline.variables.availabilityType> == "primary"
+        - parallel:
+              - stage:
+                    name: Pushpin Deployment
+                    identifier: Pushpin_Deployment
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    manifests:
+                                        - manifest:
+                                              identifier: cf_pushpin_manifest
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/cf-pushpin
+                                                          branch: master
+                                                  skipResourceVersioning: false
+                                        - manifest:
+                                              identifier: all_cf_pushpin_values
+                                              type: Values
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/all-services.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-pushpin/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-pushpin/<+pipeline.variables.availabilityType>/values.yaml
+                                                          branch: master
+                                    artifacts:
+                                        primary:
+                                            type: Gcr
+                                            spec:
+                                                connectorRef: Platform_Viewer
+                                                imagePath: platform-205701/harness/saas-openjdk-8u242/ff-worker
+                                                registryHostname: us.gcr.io
+                                                tag: <+input>
+                                        sidecars:
+                                            - sidecar:
+                                                  type: Gcr
+                                                  spec:
+                                                      connectorRef: Platform_Viewer
+                                                      imagePath: platform-205701/harness/saas-openjdk-8u242/ff-pushpin
+                                                      registryHostname: us.gcr.io
+                                                      tag: <+input>
+                                                  identifier: pushpin
+                                    variables: []
+                            serviceRef: cf_pushpin
+                        infrastructure:
+                            environmentRef: <+pipeline.variables.ENV>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: <+pipeline.stages.Collect_CollectorRef.spec.infrastructure.infrastructureDefinition.spec.connectorRef>
+                                    namespace: <+pipeline.variables.namespace>
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      name: Rollout Deployment
+                                      identifier: rolloutDeployment
+                                      type: K8sRollingDeploy
+                                      timeout: 10m
+                                      spec:
+                                          skipDryRun: false
+                            rollbackSteps:
+                                - step:
+                                      name: Rollback Rollout Deployment
+                                      identifier: rollbackRolloutDeployment
+                                      type: K8sRollingRollback
+                                      timeout: 10m
+                                      spec: {}
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+              - stage:
+                    name: Admin Server Deployment
+                    identifier: Admin_Server_Deployment
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    manifests:
+                                        - manifest:
+                                              identifier: cf_admin_server_manifest
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/cf-admin
+                                                          branch: master
+                                                  skipResourceVersioning: false
+                                        - manifest:
+                                              identifier: all_cf_admin_server_values
+                                              type: Values
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/all-services.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-admin/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-admin/<+pipeline.variables.availabilityType>/values.yaml
+                                                          branch: master
+                                    artifacts:
+                                        primary:
+                                            type: Gcr
+                                            spec:
+                                                connectorRef: Platform_Viewer
+                                                imagePath: platform-205701/harness/saas-openjdk-8u242/ff-server
+                                                registryHostname: us.gcr.io
+                                                tag: <+input>
+                                    variables: []
+                            serviceRef: cf_admin_server
+                        infrastructure:
+                            environmentRef: <+pipeline.variables.ENV>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: <+pipeline.stages.Collect_CollectorRef.spec.infrastructure.infrastructureDefinition.spec.connectorRef>
+                                    namespace: <+pipeline.variables.namespace>
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      name: Rollout Deployment
+                                      identifier: rolloutDeployment
+                                      type: K8sRollingDeploy
+                                      timeout: 10m
+                                      spec:
+                                          skipDryRun: false
+                            rollbackSteps:
+                                - step:
+                                      name: Rollback Rollout Deployment
+                                      identifier: rollbackRolloutDeployment
+                                      type: K8sRollingRollback
+                                      timeout: 10m
+                                      spec: {}
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+              - stage:
+                    name: Client Server Deployment
+                    identifier: Client_Server_Deployment
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    manifests:
+                                        - manifest:
+                                              identifier: cf_client_server_manifest
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/cf-client
+                                                          branch: master
+                                                  skipResourceVersioning: false
+                                        - manifest:
+                                              identifier: all_cf_client_server_values
+                                              type: Values
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/all-services.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-client/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-client/<+pipeline.variables.availabilityType>/values.yaml
+                                                          branch: master
+                                    variables: []
+                                    artifacts:
+                                        primary:
+                                            type: Gcr
+                                            spec:
+                                                connectorRef: Platform_Viewer
+                                                imagePath: platform-205701/harness/saas-openjdk-8u242/ff-server
+                                                registryHostname: us.gcr.io
+                                                tag: <+input>
+                            serviceRef: cf_client_server
+                        infrastructure:
+                            environmentRef: <+pipeline.variables.ENV>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: <+pipeline.stages.Collect_CollectorRef.spec.infrastructure.infrastructureDefinition.spec.connectorRef>
+                                    namespace: <+pipeline.variables.namespace>
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      name: Rollout Deployment
+                                      identifier: rolloutDeployment
+                                      type: K8sRollingDeploy
+                                      timeout: 10m
+                                      spec:
+                                          skipDryRun: false
+                            rollbackSteps:
+                                - step:
+                                      name: Rollback Rollout Deployment
+                                      identifier: rollbackRolloutDeployment
+                                      type: K8sRollingRollback
+                                      timeout: 10m
+                                      spec: {}
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+              - stage:
+                    name: Metric Server Deployment
+                    identifier: Metric_Server_Deployment
+                    description: ""
+                    type: Deployment
+                    spec:
+                        serviceConfig:
+                            serviceDefinition:
+                                type: Kubernetes
+                                spec:
+                                    manifests:
+                                        - manifest:
+                                              identifier: cf_metric_server_manifest
+                                              type: K8sManifest
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/cf-metric
+                                                          branch: master
+                                                  skipResourceVersioning: false
+                                        - manifest:
+                                              identifier: all_cf_metric_server_values
+                                              type: Values
+                                              spec:
+                                                  store:
+                                                      type: Git
+                                                      spec:
+                                                          connectorRef: Prod_NG_Manifest_Repo
+                                                          gitFetchType: Branch
+                                                          paths:
+                                                              - cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/all-services.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-metric/values.yaml
+                                                              - environments/<+pipeline.variables.ENV>/cf/cf-metric/<+pipeline.variables.availabilityType>/values.yaml
+                                                          branch: master
+                                    variables: []
+                                    artifacts:
+                                        primary:
+                                            type: Gcr
+                                            spec:
+                                                connectorRef: Platform_Viewer
+                                                imagePath: platform-205701/harness/saas-openjdk-8u242/ff-server
+                                                registryHostname: us.gcr.io
+                                                tag: <+input>
+                            serviceRef: cf_metric_server
+                        infrastructure:
+                            environmentRef: <+pipeline.variables.ENV>
+                            infrastructureDefinition:
+                                type: KubernetesDirect
+                                spec:
+                                    connectorRef: <+pipeline.stages.Collect_CollectorRef.spec.infrastructure.infrastructureDefinition.spec.connectorRef>
+                                    namespace: <+pipeline.variables.namespace>
+                                    releaseName: release-<+INFRA_KEY>
+                            allowSimultaneousDeployments: false
+                        execution:
+                            steps:
+                                - step:
+                                      name: Rollout Deployment
+                                      identifier: rolloutDeployment
+                                      type: K8sRollingDeploy
+                                      timeout: 10m
+                                      spec:
+                                          skipDryRun: false
+                            rollbackSteps:
+                                - step:
+                                      name: Rollback Rollout Deployment
+                                      identifier: rollbackRolloutDeployment
+                                      type: K8sRollingRollback
+                                      timeout: 10m
+                                      spec: {}
+                    tags: {}
+                    failureStrategies:
+                        - onFailure:
+                              errors:
+                                  - AllErrors
+                              action:
+                                  type: StageRollback
+        - stage:
+              name: JiraClosure
+              identifier: JiraClosure
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: Jira Update
+                                identifier: jiraUpdate
+                                type: JiraUpdate
+                                timeout: 5m
+                                spec:
+                                    connectorRef: JiraOperations
+                                    issueKey: <+pipeline.stages.JiraApproval.spec.execution.steps.jiraCreate.issue.key>
+                                    transitionTo:
+                                        transitionName: ""
+                                        status: Deployed
+                                    fields: []
+                                    delegateSelectors:
+                                        - stage-delegate-prod
+                                failureStrategies: []
+                  serviceDependencies: []
+              tags: {}
+    variables:
+        - name: ENV
+          type: String
+          value: <+input>
+        - name: namespace
+          type: String
+          value: <+input>
+        - name: MSG_BROKER_PROVIDER
+          type: String
+          value: redis
+        - name: DB_HOST
+          type: String
+          value: <+input>
+        - name: DB_NAME
+          type: String
+          value: <+input>
+        - name: DB_USER
+          type: Secret
+          value: <+input>
+        - name: DB_PASS
+          type: Secret
+          value: <+input>
+        - name: PLATFORM_SECRET_KEY
+          type: Secret
+          value: jwtNextGenManagerServiceSecret
+        - name: PLATFORM_INTEGRATION_ENABLED
+          type: String
+          value: "true"
+        - name: ANALYTICS_DB_HOST
+          type: String
+          value: <+input>
+        - name: ANALYTICS_DB_PORT
+          type: String
+          value: <+input>
+        - name: ANALYTICS_DB_PASS
+          type: Secret
+          value: <+input>
+        - name: ANALYTICS_DB_NAME
+          type: String
+          value: <+input>
+        - name: ANALYTICS_DB_USER
+          type: Secret
+          value: <+input>
+        - name: JWT_IDENTITY_SERVICE_SERCRET
+          type: Secret
+          value: jwtIdentityServiceSecret_prod
+        - name: PLATFORM_AUTH_KEY
+          type: Secret
+          value: <+input>
+        - name: EVENTS_FRAMEWORK_REDIS_SSL_ENABLED
+          type: String
+          value: <+input>.allowedValues(yes,false)
+        - name: EVENTS_FRAMEWORK_REDIS_ENV
+          type: String
+          value: <+input>
+        - name: EVENTS_FRAMEWORK_REDIS_PASSWORD
+          type: String
+          value: <+input>
+        - name: EVENTS_FRAMEWORK_USE_REDIS_PASSWORD
+          type: String
+          value: <+input>.allowedValues(true,false)
+        - name: REDISLABS_CA_PEM
+          type: Secret
+          value: <+input>
+        - name: ANALYTICS_SSL_MODE
+          type: String
+          value: <+input>.allowedValues(disable,require)
+        - name: pathPrefix
+          type: String
+          value: <+input>.allowedValues(/gratis,"",/prod1)
+        - name: CF_REDIS_PASSWORD
+          type: String
+          value: <+input>
+        - name: EVENTS_FRAMEWORK_ENV_NAMESPACE
+          type: String
+          value: <+input>
+        - name: AUTH_SECRET
+          type: Secret
+          value: <+input>
+        - name: CLUSTER_IDENTIFIER
+          type: String
+          value: <+input>
+        - name: availabilityType
+          type: String
+          value: <+input>.allowedValues(primary,failover)
+        - name: PLATFORM_BASE_URL_dummy
+          type: String
+          value: <+input>
+    notificationRules:
+        - name: notify_ops
+          pipelineEvents:
+              - type: PipelineStart
+              - type: PipelineEnd
+              - type: PipelineSuccess
+              - type: PipelineFailed
+          notificationMethod:
+              value:
+                  type: Slack
+                  spec:
+                      userGroups: []
+                      webhookUrl: https://hooks.slack.com/services/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
+          enabled: true
