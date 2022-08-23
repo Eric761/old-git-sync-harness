@@ -17,3 +17,6 @@ inputSet:
                 type: "Http"
                 spec:
                   url: "https://m.n"
+                  method: "GET"
+                  requestBody: "q3rf"
+                timeout: "4m"
