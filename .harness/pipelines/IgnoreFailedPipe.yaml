@@ -1,0 +1,44 @@
+pipeline:
+  name: IgnoreFailedPipe
+  identifier: IgnoreFailedPipe
+  projectIdentifier: Kapil
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: stg1
+        identifier: stg1
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          execution:
+            steps:
+              - step:
+                  type: K8sRollingDeploy
+                  name: roll
+                  identifier: roll
+                  spec:
+                    skipDryRun: false
+                  timeout: 10m
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: Ignore
+            rollbackSteps: []
+          service:
+            serviceRef: S1K8s
+          environment:
+            environmentRef: e1
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: infra1
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
