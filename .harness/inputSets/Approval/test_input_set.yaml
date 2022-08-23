@@ -1,0 +1,21 @@
+inputSet:
+  identifier: "test_input_set"
+  name: "test input set"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "Approval"
+    stages:
+    - stage:
+        identifier: "test"
+        type: "Approval"
+        spec:
+          execution:
+            steps:
+            - step:
+                identifier: "approval"
+                type: "HarnessApproval"
+                spec:
+                  approvers:
+                    userGroups:
+                    - "account.Chirag_Account_UG"
