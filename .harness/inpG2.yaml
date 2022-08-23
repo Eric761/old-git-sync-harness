@@ -19,4 +19,3 @@ inputSet:
                   url: "https://m.n"
                   method: "GET"
                   requestBody: "reqg"
-                timeout: "3m"
