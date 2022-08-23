@@ -1,0 +1,57 @@
+pipeline:
+    name: Inline Co
+    identifier: Inline_Co
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: test
+              identifier: test
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: web
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              variables: []
+                  infrastructure:
+                      environmentRef: prod_environment
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: test1111
+                              namespace: test
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                type: TerraformDestroy
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    provisionerIdentifier: asd
+                                    configuration:
+                                        type: Inline
+                                        spec:
+                                            configFiles:
+                                                store:
+                                                    spec:
+                                                        connectorRef: sdf
+                                                        repoName: asd
+                                                        gitFetchType: Branch
+                                                        branch: asd
+                                                        folderPath: asd
+                                                    type: Git
+                                timeout: 10m
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
