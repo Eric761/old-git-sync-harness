@@ -1,0 +1,22 @@
+inputSet:
+  identifier: "iko"
+  name: "iko"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "testAws"
+    stages:
+    - stage:
+        identifier: "sshAws"
+        type: "Deployment"
+        spec:
+          environment:
+            infrastructureDefinitions:
+            - identifier: "aws"
+              inputs:
+                identifier: "aws"
+                type: "SshWinRmAws"
+                spec:
+                  connectorRef: "account.aws_30_day_connector_for_pms"
+                  credentialsRef: "account.identifier"
+                  region: "us-east-1"
