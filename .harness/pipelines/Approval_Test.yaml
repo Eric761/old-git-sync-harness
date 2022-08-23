@@ -1,0 +1,73 @@
+pipeline:
+    name: Approval Test
+    identifier: Approval_Test
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: test
+              identifier: test
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: Approval
+                                identifier: approval
+                                type: HarnessApproval
+                                timeout: 1d
+                                spec:
+                                    approvalMessage: |-
+                                        Please review the following information
+                                        and approve the pipeline progression
+                                    includePipelineExecutionHistory: false
+                                    approvers:
+                                        minimumCount: 1
+                                        disallowPipelineExecutor: false
+                                        userGroups:
+                                            - test
+                                    approverInputs: []
+                          - step:
+                                type: Http
+                                name: sdf
+                                identifier: sdf
+                                spec:
+                                    url: <+input>
+                                    method: GET
+                                    headers: []
+                                    outputVariables: []
+                                timeout: 10s
+                          - stepGroup:
+                                name: Test  asd asdasd asdasdasd
+                                identifier: Test_asd_asdasd_asdasdasd
+                                steps:
+                                    - step:
+                                          type: Barrier
+                                          name: testaa
+                                          identifier: testaa
+                                          spec:
+                                              barrierRef: test
+                                          timeout: 10m
+                          - stepGroup:
+                                name: dfgghf fghfgh fghfgh fgh
+                                identifier: dfgghf_fghfgh_fghfgh_fgh
+                                steps:
+                                    - step:
+                                          type: Http
+                                          name: Test1
+                                          identifier: Test1
+                                          spec:
+                                              url: https://google.com
+                                              method: GET
+                                              headers: []
+                                              outputVariables: []
+                                          timeout: 10s
+                  serviceDependencies: []
+              tags: {}
+    flowControl:
+        barriers:
+            - name: test
+              identifier: test
+    timeout: <+input>
