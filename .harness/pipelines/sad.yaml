@@ -1,0 +1,117 @@
+pipeline:
+    name: sad
+    identifier: sad
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: sdf
+              identifier: sdf
+              description: ""
+              type: CI
+              spec:
+                  cloneCodebase: true
+                  infrastructure:
+                      type: KubernetesDirect
+                      spec:
+                          connectorRef: account.builfarm
+                          namespace: dg
+                  execution:
+                      steps:
+                          - step:
+                                type: Run
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    connectorRef: harnessImage
+                                    image: test
+                                    command: asd
+                                    privileged: false
+        - stage:
+              name: sdfhh
+              identifier: sdfhh
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              artifacts:
+                                  sidecars: []
+                                  primary:
+                                      type: DockerRegistry
+                                      spec:
+                                          connectorRef: harnessImage
+                                          imagePath: sdfff/sdfsdf/sdf/sdfsdfff/sdfsdf/sdf/sdfsdfff/sdfsdf/sdf/sdfasdllllll
+                                          tag: <+input>
+                              manifestOverrideSets: []
+                              manifests:
+                                  - manifest:
+                                        identifier: sdf
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: Github_CCD
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - sdfff/sdfsdf/sdf/sdf/sdfff/sdfsdf/sdf/sdf
+                                                    branch: sdf
+                                            skipResourceVersioning: false
+                                  - manifest:
+                                        identifier: sdfsdf
+                                        type: Values
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: Github_CCD
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - /sdfsdffdsf
+                                                    branch: sdf
+                              variables: []
+                      serviceRef: jj
+                  infrastructure:
+                      environmentRef: dfg
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: account.builfarm
+                              namespace: sdf
+                              releaseName: sdf
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: ""
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: sdf
+                                identifier: sdf
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: sdf
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+    properties:
+        ci:
+            codebase:
+                connectorRef: Github_CCD
+                build: <+input>
