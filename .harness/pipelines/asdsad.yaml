@@ -1,0 +1,95 @@
+pipeline:
+    name: asdsad
+    identifier: asdsad
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    tags: {}
+    stages:
+        - stage:
+              name: asd
+              identifier: asd
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceDefinition:
+                          type: Kubernetes
+                          spec:
+                              manifestOverrideSets: []
+                              manifests: []
+                              artifacts:
+                                  sidecars: []
+                              variables: []
+                      serviceRef: asd
+                  infrastructure:
+                      environmentRef: qa
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: account.killng
+                              namespace: asd
+                              releaseName: asd
+                      allowSimultaneousDeployments: false
+                      infrastructureKey: ""
+                  execution:
+                      steps:
+                          - step:
+                                type: ShellScript
+                                name: asd
+                                identifier: asd
+                                spec:
+                                    shell: Bash
+                                    onDelegate: true
+                                    source:
+                                        type: Inline
+                                        spec:
+                                            script: <+input>
+                                    environmentVariables: []
+                                    outputVariables: []
+                                    executionTarget: {}
+                                timeout: 10m
+                          - step:
+                                type: Barrier
+                                name: fffasd
+                                identifier: fffasd
+                                spec:
+                                    barrierRef: asdasd
+                                timeout: 10m
+                      rollbackSteps: []
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+        - stage:
+              name: asdasd
+              identifier: asdasd
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: Approval
+                                identifier: approval
+                                type: HarnessApproval
+                                timeout: 1d
+                                spec:
+                                    approvalMessage: |-
+                                        Please review the following information
+                                        and approve the pipeline progression
+                                    includePipelineExecutionHistory: true
+                                    approvers:
+                                        minimumCount: 1
+                                        disallowPipelineExecutor: false
+                                        userGroups:
+                                            - test
+                                    approverInputs: []
+              tags: {}
+              failureStrategies: []
+    flowControl:
+        barriers:
+            - name: asdasd
+              identifier: asdasd
