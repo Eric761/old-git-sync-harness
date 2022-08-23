@@ -1,0 +1,22 @@
+inputSet:
+  identifier: "ikonojev"
+  name: "ikonojev"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "testAws"
+    stages:
+    - stage:
+        identifier: "sshAws"
+        type: "Deployment"
+        spec:
+          environment:
+            infrastructureDefinitions:
+            - identifier: "infraAws"
+              inputs:
+                identifier: "infraAws"
+                type: "SshWinRmAws"
+                spec:
+                  connectorRef: "AWS_IRSA"
+                  credentialsRef: "sshInfraKey"
+                  region: "us-west-1"
