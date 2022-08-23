@@ -1,0 +1,20 @@
+inputSet:
+  identifier: "asd"
+  pipeline:
+    identifier: "New_Delegate_Test_1"
+    stages:
+    - stage:
+        identifier: "Demo_Stage_1"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: "Kubernetes"
+              spec:
+                variables:
+                - name: "Trdy"
+                  type: "String"
+                  value: "asd"
+  name: "asd"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
