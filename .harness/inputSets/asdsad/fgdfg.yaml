@@ -1,0 +1,22 @@
+inputSet:
+  identifier: "fgdfg"
+  name: "fgdfg"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "asdsad"
+    stages:
+    - stage:
+        identifier: "asd"
+        type: "Deployment"
+        spec:
+          execution:
+            steps:
+            - step:
+                identifier: "asd"
+                type: "ShellScript"
+                spec:
+                  source:
+                    type: "Inline"
+                    spec:
+                      script: "echo 1"
