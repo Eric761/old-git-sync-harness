@@ -1,0 +1,40 @@
+inputSet:
+  identifier: "quickstart1"
+  name: "quick-start"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "CD_Demo_Pipeline"
+    stages:
+    - parallel:
+      - stage:
+          identifier: "K8s_Rolling"
+          type: "Deployment"
+          spec:
+            serviceConfig:
+              serviceDefinition:
+                type: "Kubernetes"
+                spec:
+                  artifacts:
+                    primary:
+                      type: "DockerRegistry"
+                      spec:
+                        tag: "stable-perl"
+            infrastructure:
+              infrastructureDefinition:
+                type: "KubernetesDirect"
+                spec:
+                  namespace: "rohan-dev"
+      - stage:
+          identifier: "K8s_Canary"
+          type: "Deployment"
+          spec:
+            serviceConfig:
+              serviceDefinition:
+                type: "Kubernetes"
+                spec:
+                  artifacts:
+                    primary:
+                      type: "DockerRegistry"
+                      spec:
+                        tag: "stable-perl"
