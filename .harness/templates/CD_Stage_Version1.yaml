@@ -1,0 +1,52 @@
+template:
+    name: CD Stage
+    identifier: CD_Stage
+    versionLabel: Version1
+    type: Stage
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    description: null
+    tags: {}
+    spec:
+        type: Deployment
+        spec:
+            serviceConfig:
+                serviceRef: test
+                serviceDefinition:
+                    type: Kubernetes
+                    spec:
+                        variables: []
+            infrastructure:
+                environmentRef: prod_environment
+                infrastructureDefinition:
+                    type: KubernetesDirect
+                    spec:
+                        connectorRef: Test222
+                        namespace: asd
+                        releaseName: release-<+INFRA_KEY>
+                allowSimultaneousDeployments: false
+            execution:
+                steps:
+                    - step:
+                          type: ShellScript
+                          name: step11
+                          identifier: step11
+                          spec:
+                              shell: Bash
+                              onDelegate: true
+                              source:
+                                  type: Inline
+                                  spec:
+                                      script: echo 1
+                              environmentVariables: []
+                              outputVariables: []
+                              executionTarget:
+                                  connectorRef: null
+                          timeout: 10m
+                rollbackSteps: []
+        failureStrategies:
+            - onFailure:
+                  errors:
+                      - AllErrors
+                  action:
+                      type: StageRollback
