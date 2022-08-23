@@ -18,4 +18,3 @@ inputSet:
                 spec:
                   method: "GET"
                   requestBody: "egrf"
-                timeout: "10m"
