@@ -7,6 +7,5 @@ overlayInputSet:
   inputSetReferences:
     - inpG2
     - inpG4
-    - inpG3
     - inpG1
   tags: {}
