@@ -1,0 +1,34 @@
+template:
+    name: CI Stage
+    identifier: CI_Stage
+    versionLabel: Version1
+    type: Stage
+    projectIdentifier: Kapil
+    orgIdentifier: default
+    description: null
+    tags: {}
+    spec:
+        type: CI
+        spec:
+            cloneCodebase: true
+            infrastructure:
+                type: KubernetesDirect
+                spec:
+                    connectorRef: Test222
+                    namespace: asd
+                    serviceAccountName: null
+                    runAsUser: null
+                    initTimeout: null
+                    labels: null
+            execution:
+                steps:
+                    - step:
+                          type: BuildAndPushDockerRegistry
+                          name: test
+                          identifier: test
+                          spec:
+                              connectorRef: harnessImage
+                              repo: asd
+                              tags:
+                                  - test
+                              optimize: true
