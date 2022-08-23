@@ -1,0 +1,13 @@
+inputSet:
+  identifier: "<+input>"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "ASDAS"
+    stages:
+    - stage:
+        identifier: "sdfsdf"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceRef: "Devi"
