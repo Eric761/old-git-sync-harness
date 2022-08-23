@@ -1,0 +1,27 @@
+pipeline:
+  name: Eric Git Sync
+  identifier: Eric_Git_Sync
+  projectIdentifier: Kapil
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: stg1
+        identifier: stg1
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: Http
+                  name: stp1
+                  identifier: stp1
+                  spec:
+                    url: <+input>
+                    method: GET
+                    headers: []
+                    outputVariables: []
+                    requestBody: <+input>
+                  timeout: <+input>
+        tags: {}
