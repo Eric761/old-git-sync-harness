@@ -1,0 +1,24 @@
+inputSet:
+  identifier: "sdfsdfaa"
+  name: "sdfsdfaa"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "Test_Pipelineas_asd"
+    stages:
+    - stage:
+        identifier: "qa"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceDefinition:
+              type: "Kubernetes"
+              spec:
+                variables:
+                - name: "asd"
+                  type: "String"
+                  value: "ggg"
+    variables:
+    - name: "Test"
+      type: "String"
+      value: "asdasd"
