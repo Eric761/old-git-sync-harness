@@ -1,0 +1,18 @@
+inputSet:
+  identifier: "test"
+  pipeline:
+    identifier: "Test_Pipeline_New"
+    stages:
+    - stage:
+        identifier: "Deploy"
+        type: "Deployment"
+        spec:
+          infrastructure:
+            infrastructureDefinition:
+              type: "KubernetesDirect"
+              spec:
+                connectorRef: "Test222"
+                namespace: "test"
+  name: "test"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
