@@ -1,0 +1,23 @@
+inputSet:
+  identifier: "Random_Input_Set"
+  name: "Random Input Set"
+  tags: {}
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "ASDAS"
+    stages:
+    - stage:
+        identifier: "sdfsdf"
+        type: "Deployment"
+        spec:
+          serviceConfig:
+            serviceRef: "Newdds"
+          execution:
+            steps:
+            - step:
+                identifier: "S"
+                type: "Http"
+                spec:
+                  url: "some-url"
+                  requestBody: "some-body"
