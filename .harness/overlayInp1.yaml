@@ -1,5 +1,6 @@
 overlayInputSet:
   name: overlayInp1
+  tags: {}
   identifier: overlayInp1
   orgIdentifier: default
   projectIdentifier: Kapil
@@ -7,4 +8,4 @@ overlayInputSet:
   inputSetReferences:
     - inpG4
     - inpG3
-  tags: {}
+    - inpG2
