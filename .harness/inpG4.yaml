@@ -18,5 +18,4 @@ inputSet:
                 spec:
                   url: "https://m.n"
                   method: "GET"
-                  requestBody: "tthdyn"
                 timeout: "2m"
