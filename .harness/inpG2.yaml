@@ -17,4 +17,5 @@ inputSet:
                 type: "Http"
                 spec:
                   url: "https://m.n"
-                  requestBody: "reqg"
+                  method: "GET"
+                timeout: "10m"
