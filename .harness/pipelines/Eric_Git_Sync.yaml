@@ -21,7 +21,7 @@ pipeline:
                     url: <+input>
                     headers: []
                     outputVariables: []
-                    method: GET
-                    requestBody: rsgg
-                  timeout: 10m
+                    method: <+input>
+                    requestBody: <+input>
+                  timeout: <+input>
         tags: {}
