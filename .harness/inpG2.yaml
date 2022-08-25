@@ -18,4 +18,3 @@ inputSet:
                 spec:
                   url: "https://m.n"
                   method: "GET"
-                timeout: "10m"
