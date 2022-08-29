@@ -1,0 +1,22 @@
+inputSet:
+  identifier: "tesInp"
+  name: "tesInp"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "Eric_Git_Sync"
+    stages:
+    - stage:
+        identifier: "stg1"
+        type: "Custom"
+        spec:
+          execution:
+            steps:
+            - step:
+                identifier: "stp1"
+                type: "Http"
+                spec:
+                  requestBody: "reg"
+                  url: "https://b.m"
+                  method: "GET"
+                timeout: "10m"
