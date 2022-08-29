@@ -16,7 +16,6 @@ inputSet:
                 identifier: "stp1"
                 type: "Http"
                 spec:
-                  requestBody: "reg"
                   url: "https://b.m"
                   method: "GET"
                 timeout: "10m"
