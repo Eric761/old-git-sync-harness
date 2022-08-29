@@ -23,5 +23,5 @@ pipeline:
                     url: <+input>
                     method: <+input>
                     requestBody: ferg
-                  timeout: <+input>
+                  timeout: 1m
         tags: {}
