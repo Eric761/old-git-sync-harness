@@ -7,5 +7,3 @@ overlayInputSet:
   pipelineIdentifier: Eric_Git_Sync
   inputSetReferences:
     - inpG2
-    - inpG3
-    - inpG1
