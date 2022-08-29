@@ -1,9 +1,0 @@
-overlayInputSet:
-  name: overlayInpG1
-  tags: {}
-  identifier: overlayInpG1
-  orgIdentifier: default
-  projectIdentifier: Kapil
-  pipelineIdentifier: Eric_Git_Sync
-  inputSetReferences:
-    - inpG2
