@@ -20,8 +20,8 @@ pipeline:
                   spec:
                     headers: []
                     outputVariables: []
-                    url: <+input>
                     method: <+input>
                     requestBody: ferg
+                    url: https://b.m
                   timeout: 1m
         tags: {}
