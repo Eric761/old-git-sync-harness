@@ -5,7 +5,6 @@ overlayInputSet:
   projectIdentifier: Kapil
   pipelineIdentifier: Eric_Git_Sync
   inputSetReferences:
-    - inpG3
     - inpG2
     - inpG1
   tags: {}
