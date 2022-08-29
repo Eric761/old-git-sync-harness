@@ -18,10 +18,10 @@ pipeline:
                   name: stp1
                   identifier: stp1
                   spec:
-                    url: <+input>
                     headers: []
                     outputVariables: []
-                    method: <+input>
-                    requestBody: req
+                    requestBody: <+input>
+                    url: https://b.m
+                    method: GET
                   timeout: 1m
         tags: {}
