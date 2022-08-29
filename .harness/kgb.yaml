@@ -1,0 +1,10 @@
+overlayInputSet:
+  name: kgb
+  identifier: kgb
+  orgIdentifier: default
+  projectIdentifier: Kapil
+  pipelineIdentifier: Eric_Git_Sync
+  inputSetReferences:
+    - tesInp
+    - test
+  tags: {}
