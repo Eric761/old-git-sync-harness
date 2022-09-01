@@ -17,3 +17,6 @@ inputSet:
                 type: "Http"
                 spec:
                   method: "GET"
+                  requestBody: "req"
+                  url: "https://b.m"
+                timeout: "10m"
