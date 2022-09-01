@@ -21,7 +21,7 @@ pipeline:
                     headers: []
                     outputVariables: []
                     method: <+input>
-                    requestBody: ferg
-                    url: https://b.m
-                  timeout: 1m
+                    requestBody: <+input>
+                    url: <+input>
+                  timeout: <+input>
         tags: {}
