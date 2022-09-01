@@ -20,8 +20,8 @@ pipeline:
                   spec:
                     headers: []
                     outputVariables: []
-                    method: <+input>
                     requestBody: <+input>
                     url: <+input>
+                    method: GET
                   timeout: <+input>
         tags: {}
