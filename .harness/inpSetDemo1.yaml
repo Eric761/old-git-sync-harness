@@ -1,0 +1,21 @@
+inputSet:
+  identifier: "inpSetDemo1"
+  name: "inpSetDemo1"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "Eric_Git_Sync"
+    stages:
+    - stage:
+        identifier: "stg1"
+        type: "Custom"
+        spec:
+          execution:
+            steps:
+            - step:
+                identifier: "stp1"
+                type: "Http"
+                spec:
+                  requestBody: "req"
+                  url: "https://google.com"
+                timeout: "10m"
