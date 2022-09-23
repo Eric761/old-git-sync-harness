@@ -23,5 +23,5 @@ pipeline:
                     requestBody: <+input>
                     url: <+input>
                     method: GET
-                  timeout: <+input>
+                  timeout: 1m
         tags: {}
