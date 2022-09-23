@@ -18,3 +18,4 @@ inputSet:
                 spec:
                   requestBody: "req"
                   url: "https://google.com"
+                timeout: "9m"
