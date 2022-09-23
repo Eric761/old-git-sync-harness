@@ -1,0 +1,20 @@
+inputSet:
+  identifier: "inpSetDemo2"
+  name: "inpSetDemo2"
+  orgIdentifier: "default"
+  projectIdentifier: "Kapil"
+  pipeline:
+    identifier: "Eric_Git_Sync"
+    stages:
+    - stage:
+        identifier: "stg1"
+        type: "Custom"
+        spec:
+          execution:
+            steps:
+            - step:
+                identifier: "stp1"
+                type: "Http"
+                spec:
+                  url: "https://github.com"
+                timeout: "10m"
