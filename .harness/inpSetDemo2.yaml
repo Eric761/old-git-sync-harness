@@ -17,4 +17,3 @@ inputSet:
                 type: "Http"
                 spec:
                   url: "https://github.com"
-                timeout: "10m"
