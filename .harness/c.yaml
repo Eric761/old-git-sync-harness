@@ -1,0 +1,30 @@
+pipeline:
+  name: c
+  identifier: c
+  projectIdentifier: Kapil
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: xz
+        identifier: xz
+        description: ""
+        type: Approval
+        spec:
+          execution:
+            steps:
+              - step:
+                  name: cdxs
+                  identifier: cdxs
+                  type: JiraCreate
+                  timeout: 5m
+                  spec:
+                    connectorRef: testJira
+                    projectKey: DEL
+                    issueType: "Yes"
+                    fields:
+                      - name: Description
+                        value: <+input>
+                      - name: Summary
+                        value: trfedws
+        tags: {}
