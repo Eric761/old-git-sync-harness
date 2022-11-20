@@ -1,0 +1,11 @@
+connector:
+  name: test-Jira
+  identifier: testJira
+  description: ""
+  orgIdentifier: default
+  projectIdentifier: Kapil
+  type: Jira
+  spec:
+    jiraUrl: https://harness.atlassian.net
+    username: sonali.goyal@harness.io
+    passwordRef: JiraCreate
